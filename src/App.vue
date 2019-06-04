@@ -82,6 +82,8 @@ export default {
 
     this.performance.on('fetching-data', viewPortDataset => {
       const dataset = Object.keys(viewPortDataset)
+        .sort()
+      console.log('DATASET', dataset)
       this.$notify({
         group: 'custom-report',
         title: 'Fetching data',
