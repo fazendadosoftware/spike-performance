@@ -1,5 +1,6 @@
 import EventEmitter from 'events'
 import { debounce } from './index'
+import Vue from 'vue'
 
 export default class Performance extends EventEmitter {
   constructor () {
@@ -13,6 +14,7 @@ export default class Performance extends EventEmitter {
     this._dataset = []
     this._viewPortDataset = {}
     this.debounceFn = debounce(() => {
+      this.fetchViewPortDataset()
       this.emit('fetching-data', this.viewPortDataset)
     }, 500)
   }
@@ -73,6 +75,10 @@ export default class Performance extends EventEmitter {
    */
   set view (view) {
     this._view = view
+  }
+
+  get dataset () {
+    return this._dataset
   }
 
   set dataset (dataset) {
@@ -191,5 +197,67 @@ export default class Performance extends EventEmitter {
     delete node.relations
     this._tree.push(node)
     this.emit('tree', this._tree)
+  }
+
+  async fetchViewPortDataset () {
+    const ids = Object.values(this.viewPortDataset)
+      .map(item => item.id)
+
+    const FRAGMENT_TOKEN = `%%NEXT_FRAGMENT%%`
+    const replaceFragmentTokenRegex = new RegExp(FRAGMENT_TOKEN, 'g')
+    const query = this.tree.reduce((accumulator, edge, idx, tree) => {
+      const isLastNode = idx === (tree.length - 1)
+      const { factSheetType, relationType } = edge
+      const { targetFactSheetType } = this.factSheetTypes[factSheetType].relations
+        .find(relation => relation.relationType === relationType)
+      const fragment = `
+        ...on ${factSheetType} {
+          id
+          name
+          ${relationType} {
+            totalCount
+            edges {
+              node {
+                factSheet {
+                  ${isLastNode ? `...on ${targetFactSheetType} { id name }` : FRAGMENT_TOKEN}
+                }
+              }
+            }
+          }
+        }`
+      return accumulator.replace(replaceFragmentTokenRegex, fragment)
+    }, `query($filter:FilterInput){
+      allFactSheets(filter:$filter) {
+        edges {
+          node {
+            ${FRAGMENT_TOKEN}
+          }
+        }
+      }
+    }`)
+    console.log('QUERY', query)
+    const start = Date.now()
+    const dataset = await lx.executeGraphQL(query, { filter: { ids } })
+      .then(res => {
+        const dataset = res.allFactSheets.edges
+          .map(edge => {
+            const { node } = edge
+            return node
+          })
+          .reduce((accumulator, node) => { return { ...accumulator, [node.id]: node } }, {})
+        return dataset
+      })
+    const delay = Date.now() - start
+    Vue.notify({
+      group: 'custom-report',
+      title: 'Reponse time',
+      type: delay <= 400
+        ? 'success'
+        : delay <= 1000
+          ? 'warn'
+          : 'error',
+      text: `${delay}ms`
+    })
+    console.log('RX_DATASET', dataset)
   }
 }

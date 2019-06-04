@@ -65,7 +65,7 @@ export default {
     },
     visibilityChanged (isVisible, entry, factSheet) {
       if (isVisible) {
-        this.$set(this.visibleFactSheets, factSheet.name, true)
+        this.$set(this.visibleFactSheets, factSheet.name, { id: factSheet.id })
       } else {
         delete this.visibleFactSheets[factSheet.name]
       }
@@ -83,10 +83,10 @@ export default {
     this.performance.on('fetching-data', viewPortDataset => {
       const dataset = Object.keys(viewPortDataset)
         .sort()
-      console.log('DATASET', dataset)
       this.$notify({
         group: 'custom-report',
-        title: 'Fetching data',
+        // type: 'warn',
+        title: `Query start, ${this.tree.length} hop${this.tree.length === 1 ? '' : 's'}`,
         text: `${dataset[0]} / ${dataset[dataset.length - 1]}`
       })
     })
