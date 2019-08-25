@@ -105,6 +105,12 @@ export default class Performance extends EventEmitter {
     return {
       allowEditing: false,
       allowTableView: false,
+      menuActions: {
+        showConfigure: true,
+        configureCallback: () => {
+          console.log('SHOWING CONFIGURE CALLBACK')
+        }
+      },
       facets: [
         {
           key: defaultFactSheetType,

@@ -1,6 +1,8 @@
 import Vue from 'vue'
-import App from './App.vue'
+import App from './App'
 import Notifications from 'vue-notification'
+import devtools from '@vue/devtools'
+import store from './store'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons'
@@ -21,4 +23,8 @@ Vue.prototype.$lx = lx
 
 Vue.config.productionTip = false
 
-new Vue({ render: h => h(App) }).$mount('#app')
+if (process.env.NODE_ENV === 'development') {
+  devtools.connect(/* host, port */)
+}
+
+new Vue({ store, render: h => h(App) }).$mount('#app')
