@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { mapMutations, mapGetters } from 'vuex'
+import { mapMutations, mapGetters, mapActions } from 'vuex'
 import NodeSelectBox from './components/NodeSelectBox'
 import FactSheetCard from './components/FactSheetCard'
 import Performance from './helpers/performance'
@@ -60,6 +60,9 @@ export default {
     })
   },
   methods: {
+    ...mapActions({
+      generateReportConfiguration: 'performance/generateReportConfiguration'
+    }),
     ...mapMutations({
       setReportSetup: 'performance/setReportSetup'
     }),
@@ -108,6 +111,8 @@ export default {
     this.$lx.init()
       .then(reportSetup => {
         this.setReportSetup(reportSetup)
+        const config2 = this.generateReportConfiguration()
+        console.log('CONFIG2', config2)
         this.performance.reportSetup = reportSetup
         const config = this.performance.generateReportConfiguration()
         this.tree = this.performance.tree
