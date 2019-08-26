@@ -8,11 +8,6 @@
           :key="idx"
           :idx="idx"
           :node="node"
-          :factSheetTypes="factSheetTypes"
-          :tree="tree"
-          @node-update="onNodeUpdate"
-          @add-node="onAddNode"
-          @remove-node="onRemoveNode"
         />
       </div>
       <div class="bg-white p-4 m-4 shadow-md w-64">
@@ -47,16 +42,15 @@ export default {
   components: { NodeSelectBox, FactSheetCard },
   data () {
     return {
-      tree: [],
-      factSheetTypes: [],
       performance: undefined,
-      dataset: [],
       visibleFactSheets: {}
     }
   },
   computed: {
     ...mapGetters({
-      reportSetup: 'performance/reportSetup'
+      reportSetup: 'performance/reportSetup',
+      tree: 'performance/tree',
+      dataset: 'performance/dataset'
     })
   },
   methods: {
@@ -66,15 +60,6 @@ export default {
     ...mapMutations({
       setReportSetup: 'performance/setReportSetup'
     }),
-    onNodeUpdate (treeIdx, node) {
-      this.performance.updateNode(treeIdx, node)
-    },
-    onAddNode () {
-      this.performance.pushNode()
-    },
-    onRemoveNode () {
-      this.performance.popNode()
-    },
     visibilityChanged (isVisible, entry, factSheet) {
       if (isVisible) {
         this.$set(this.visibleFactSheets, factSheet.name, { id: factSheet.id })
@@ -85,12 +70,8 @@ export default {
       this.performance.debounceFn()
     }
   },
-  created () {
+  async created () {
     this.performance = new Performance()
-
-    this.performance.on('tree', tree => { this.tree = tree })
-
-    this.performance.on('factSheetTypes', factSheetTypes => { this.factSheetTypes = factSheetTypes })
 
     this.performance.on('fetching-data', viewPortDataset => {
       const dataset = Object.keys(viewPortDataset)
@@ -108,16 +89,10 @@ export default {
       this.dataset = dataset
     })
 
-    this.$lx.init()
-      .then(reportSetup => {
-        this.setReportSetup(reportSetup)
-        const config2 = this.generateReportConfiguration()
-        console.log('CONFIG2', config2)
-        this.performance.reportSetup = reportSetup
-        const config = this.performance.generateReportConfiguration()
-        this.tree = this.performance.tree
-        this.$lx.ready(config)
-      })
+    const reportSetup = await this.$lx.init()
+    this.setReportSetup(reportSetup)
+    const config = await this.generateReportConfiguration()
+    this.$lx.ready(config)
   }
 }
 </script>

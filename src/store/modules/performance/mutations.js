@@ -36,7 +36,34 @@ export const setView = (state, view) => {
   state.view = view
 }
 
-export const addNodeToTree = (state, node) => {
-  delete node.relations
-  state.tree.push(node)
+// appends a node to the tree
+export const pushNodeToTree = (state, node) => {
+  const { tree, factSheetTypes } = state
+  if (!node) {
+    const lastNode = tree[tree.length - 1]
+    let { factSheetType, relationType } = lastNode
+    const relation = factSheetTypes[factSheetType].relations
+      .find(relation => relation.relationType === relationType)
+    let { targetFactSheetType } = relation
+    targetFactSheetType = factSheetTypes[targetFactSheetType]
+    const { relations } = targetFactSheetType
+    const factSheetTypesInTree = tree.map(node => node.factSheetType)
+    const filteredRelations = relations.filter(({ targetFactSheetType }) => factSheetTypesInTree.indexOf(targetFactSheetType) < 0)
+    const targetRelationType = filteredRelations.length ? filteredRelations[0].relationType : ''
+    node = { factSheetType: targetFactSheetType.factSheetType, relationType: targetRelationType }
+  }
+  console.log('ADDING NODE', node)
+  // delete node.relations
+  tree.push(node)
+}
+
+// removes the last node from tree
+export const popNodeFromTree = state => {
+  const { tree } = state
+  tree.pop()
+}
+
+export const updateNode = (state, { treeIdx, node }) => {
+  const { tree } = state
+  tree.splice(treeIdx, 1, node)
 }

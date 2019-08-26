@@ -44,13 +44,13 @@
       <div class="flex ml-2 w-24" v-if="isLastInTree">
         <button
           v-if="!isFirstInTree"
-          @click="$emit('remove-node')"
+          @click="popNodeFromTree()"
           class="outline-none shadow-md cursor-pointer bg-red-500 hover:bg-red-700 border border-red-700 text-white font-semi-bold rounded m-1 p-1 w-12">
           <font-awesome-icon icon="minus" />
         </button>
         <button
           v-if="!isStub"
-          @click="$emit('add-node')"
+          @click="pushNodeToTree()"
           class="outline-none shadow-md cursor-pointer bg-green-500 hover:bg-green-700 border border-green-700 text-white font-semi-bold rounded m-1 p-1 w-12">
           <font-awesome-icon icon="plus" />
         </button>
@@ -60,19 +60,12 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 
 export default {
   name: 'FactSheetSelectBox',
   props: {
-    tree: {
-      type: Array,
-      required: true
-    },
     node: {
-      type: Object,
-      required: true
-    },
-    factSheetTypes: {
       type: Object,
       required: true
     },
@@ -82,6 +75,10 @@ export default {
     }
   },
   computed: {
+    ...mapGetters({
+      factSheetTypes: 'performance/factSheetTypes',
+      tree: 'performance/tree'
+    }),
     factSheetType: {
       get () {
         const { factSheetType } = this.node
@@ -95,7 +92,7 @@ export default {
             const labelB = b.label
             return labelA > labelB ? 1 : labelA < labelB ? -1 : 0
           })[0]
-        this.$emit('node-update', this.idx, { factSheetType, relationType })
+        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType } })
       }
     },
     relation: {
@@ -105,7 +102,7 @@ export default {
       },
       set (relationType) {
         const { factSheetType } = this
-        this.$emit('node-update', this.idx, { factSheetType, relationType })
+        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType } })
       }
     },
     relations () {
@@ -150,6 +147,15 @@ export default {
       const availableRelations = targetFactSheetTypeRelations.filter(({ targetFactSheetType }) => usedFactSheetTypesInTree.indexOf(targetFactSheetType) < 0).length
       return !availableRelations && this.isLastInTree
     }
+  },
+  methods: {
+    ...mapActions({
+      updateNode: 'performance/updateNode'
+    }),
+    ...mapMutations({
+      pushNodeToTree: 'performance/pushNodeToTree',
+      popNodeFromTree: 'performance/popNodeFromTree'
+    })
   }
 }
 </script>

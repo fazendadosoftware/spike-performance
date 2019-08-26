@@ -26,3 +26,17 @@ export const generateReportConfiguration = (
     reportViewFactSheetType: defaultFactSheetType
   }
 }
+
+export const updateNode = async ({ commit, dispatch, state }, { treeIdx, node }) => {
+  const { tree } = state
+  if (treeIdx === 0) {
+    const firstNode = tree[0]
+    const { factSheetType } = node
+    if (firstNode.factSheetType !== factSheetType) {
+      const config = await dispatch('generateReportConfiguration', factSheetType)
+      console.log('GOT CONFIG', config)
+      // lx.updateConfiguration(config)
+    }
+  }
+  commit('updateNode', { treeIdx, node })
+}
