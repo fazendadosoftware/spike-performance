@@ -131,7 +131,7 @@ label
   font-size 14px
   font-weight normal
   line-height 20px
-  
+
 label.checkbox
   display inline-block
   font-weight bold
