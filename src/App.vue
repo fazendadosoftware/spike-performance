@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="flex relative bg-gray-700 shadow-lg border-solid border rounded" :style="`height:calc(100vh - 20px)`">
     <notifications group="custom-report" />
-    <div class="flex flex-col justify-center items-center absolute top-0 left-0 w-1/4">
+    <div class="flex flex-col justify-center items-center absolute top-0 left-0">
       <div class="flex flex-col items-start bg-blue-300 p-4 m-4 shadow-md">
         <node-select-box
           v-for="(node, idx) in tree"
