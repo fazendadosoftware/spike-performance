@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App'
 import Notifications from 'vue-notification'
+import vmodal from 'vue-js-modal'
 import devtools from '@vue/devtools'
 import store from './store'
 
@@ -17,6 +18,7 @@ import '@/assets/css/tailwind.css'
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(VueObserveVisibility)
 Vue.use(Notifications)
+Vue.use(vmodal)
 
 /* global lx */
 Vue.prototype.$lx = lx

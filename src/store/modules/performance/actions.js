@@ -1,9 +1,8 @@
 import Vue from 'vue'
-export const generateReportConfiguration = (
-  { commit, state },
-  factSheetType
-) => {
+export const generateReportConfiguration = (store, { factSheetType, vm }) => {
+  const { commit, state } = store
   const { tree } = state
+  console.log('STORE', store, vm)
   if (!tree.length) throw Error('tree is empty')
   const defaultFactSheetType = factSheetType || tree[0].factSheetType
   return {
@@ -12,7 +11,8 @@ export const generateReportConfiguration = (
     menuActions: {
       showConfigure: true,
       configureCallback: () => {
-        console.log('SHOWING CONFIGURE CALLBACK')
+        vm.$modal.toggle('configuration-modal')
+        // vm.$modal.show('configuration-modal', { foo: 'bar' })
       }
     },
     facets: [

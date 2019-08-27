@@ -1,6 +1,7 @@
 <template>
   <div id="app" class="flex relative bg-gray-700 shadow-lg border-solid border rounded" :style="`height:calc(100vh - 20px)`">
     <notifications group="custom-report" />
+    <configuration-modal />
     <div class="flex flex-col justify-center items-center absolute top-0 left-0">
       <div class="flex flex-col items-start bg-blue-300 p-4 m-4 shadow-md">
         <node-select-box
@@ -33,12 +34,13 @@
 
 <script>
 import { mapMutations, mapGetters, mapActions } from 'vuex'
+import ConfigurationModal from './components/ConfigurationModal'
 import NodeSelectBox from './components/NodeSelectBox'
 import FactSheetCard from './components/FactSheetCard'
 
 export default {
   name: 'app',
-  components: { NodeSelectBox, FactSheetCard },
+  components: { ConfigurationModal, NodeSelectBox, FactSheetCard },
   computed: {
     ...mapGetters({
       reportSetup: 'performance/reportSetup',
@@ -59,7 +61,7 @@ export default {
   async created () {
     const reportSetup = await this.$lx.init()
     this.setReportSetup(reportSetup)
-    const config = await this.generateReportConfiguration()
+    const config = await this.generateReportConfiguration({ vm: this })
     this.$lx.ready(config)
   }
 }
@@ -68,9 +70,9 @@ export default {
 <style lang="stylus">
 
 #app
-  font-family 'Avenir', Helvetica, Arial, sans-serif
+  font-family: "Axiforma", "Helvetica Neue", Helvetica, Arial, sans-serif
+  font-size 12px
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
-  text-align center
-  color #2c3e50
+  color #333
 </style>
