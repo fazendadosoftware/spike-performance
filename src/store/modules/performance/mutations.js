@@ -45,7 +45,7 @@ export const setViewPortDatasetFactSheet = (state, { name, id }) => {
 
 export const deleteViewPortDatasetFactSheet = (state, { name }) => {
   const { viewPortDataset } = state
-  delete viewPortDataset[name]
+  if (viewPortDataset[name]) delete viewPortDataset[name]
 }
 
 export const setView = (state, view) => {

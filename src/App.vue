@@ -57,19 +57,6 @@ export default {
     })
   },
   async created () {
-    /*
-    this.performance.on('fetching-data', viewPortDataset => {
-      const dataset = Object.keys(viewPortDataset)
-        .sort()
-      this.$notify({
-        group: 'custom-report',
-        // type: 'warn',
-        title: `Query start, ${this.tree.length} hop${this.tree.length === 1 ? '' : 's'}`,
-        text: `${dataset[0]} / ${dataset[dataset.length - 1]}`
-      })
-    })
-    */
-
     const reportSetup = await this.$lx.init()
     this.setReportSetup(reportSetup)
     const config = await this.generateReportConfiguration()

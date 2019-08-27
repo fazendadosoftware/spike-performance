@@ -11,12 +11,6 @@ const performancePlugin = store => {
   })
 
   store.watch(
-    () => store.getters['performance/viewPortDataset'],
-    (newVal, oldVal) => {
-      console.log('VIEW PORT DATASET CHANGED', newVal, oldVal)
-    }
-  )
-  store.watch(
     () => store.getters['performance/queries'],
     (newVal, oldVal) => {
       if (!oldVal && newVal) lx.showSpinner()

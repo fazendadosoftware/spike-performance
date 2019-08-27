@@ -43,9 +43,10 @@ export const updateNode = async ({ commit, dispatch, state }, { treeIdx, node })
 }
 
 export const factSheetVisibilityEvtHandler = ({ commit, state }, { isVisible, entry, factSheet }) => {
+  const { viewPortDataset } = state
   const { name, id } = factSheet
   if (isVisible) commit('setViewPortDatasetFactSheet', { name, id })
-  else commit('deleteViewPortDatasetFactSheet', { name })
+  else if (viewPortDataset[name]) commit('deleteViewPortDatasetFactSheet', { name })
 }
 
 export const fetchViewPortDataset = async ({ commit, state }) => {

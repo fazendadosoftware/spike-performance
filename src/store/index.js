@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import createLogger from './logger'
+// import createLogger from './logger'
 import performance, { plugins as performancePlugins } from './modules/performance/'
 
 Vue.use(Vuex)
@@ -12,5 +12,6 @@ export default new Vuex.Store({
     performance
   },
   strict: debug,
-  plugins: [debug ? createLogger() : undefined, ...performancePlugins]
+  // plugins: [debug ? createLogger() : undefined, ...performancePlugins]
+  plugins: [...performancePlugins]
 })
