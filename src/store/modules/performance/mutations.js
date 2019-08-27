@@ -1,4 +1,9 @@
+import Vue from 'vue'
 import { mapFactSheetTypes } from './helpers'
+
+export const queryStart = state => state.queries++
+
+export const queryEnd = state => state.queries--
 
 export const setReportSetup = (state, reportSetup) => {
   const { settings } = reportSetup
@@ -29,7 +34,18 @@ export const setReportSetup = (state, reportSetup) => {
 }
 
 export const setDataset = (state, dataset) => {
+  state.visibleFactSheets = []
   state.dataset = dataset
+}
+
+export const setViewPortDatasetFactSheet = (state, { name, id }) => {
+  const { viewPortDataset } = state
+  Vue.set(viewPortDataset, name, { id })
+}
+
+export const deleteViewPortDatasetFactSheet = (state, { name }) => {
+  const { viewPortDataset } = state
+  delete viewPortDataset[name]
 }
 
 export const setView = (state, view) => {

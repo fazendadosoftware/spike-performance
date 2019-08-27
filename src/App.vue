@@ -12,7 +12,7 @@
       </div>
       <div class="bg-white p-4 m-4 shadow-md w-64">
         <h4>Viewport</h4>
-        <div class="mb-1" v-for="(factSheetName, idx) in Object.keys(visibleFactSheets).sort()" :key="idx">
+        <div class="mb-1" v-for="(factSheetName, idx) in Object.keys(viewPortDataset).sort()" :key="idx">
           {{factSheetName}}
         </div>
       </div>
@@ -23,7 +23,7 @@
         :key="factSheet.id"
         :fact-sheet="factSheet"
         v-observe-visibility="{
-          callback: (isVisible, entry) => visibilityChanged(isVisible, entry, factSheet),
+          callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
           throttle: 0
         }"
         />
@@ -35,44 +35,29 @@
 import { mapMutations, mapGetters, mapActions } from 'vuex'
 import NodeSelectBox from './components/NodeSelectBox'
 import FactSheetCard from './components/FactSheetCard'
-import Performance from './helpers/performance'
 
 export default {
   name: 'app',
   components: { NodeSelectBox, FactSheetCard },
-  data () {
-    return {
-      performance: undefined,
-      visibleFactSheets: {}
-    }
-  },
   computed: {
     ...mapGetters({
       reportSetup: 'performance/reportSetup',
       tree: 'performance/tree',
-      dataset: 'performance/dataset'
+      dataset: 'performance/dataset',
+      viewPortDataset: 'performance/viewPortDataset'
     })
   },
   methods: {
     ...mapActions({
-      generateReportConfiguration: 'performance/generateReportConfiguration'
+      generateReportConfiguration: 'performance/generateReportConfiguration',
+      factSheetVisibilityEvtHandler: 'performance/factSheetVisibilityEvtHandler'
     }),
     ...mapMutations({
       setReportSetup: 'performance/setReportSetup'
-    }),
-    visibilityChanged (isVisible, entry, factSheet) {
-      if (isVisible) {
-        this.$set(this.visibleFactSheets, factSheet.name, { id: factSheet.id })
-      } else {
-        delete this.visibleFactSheets[factSheet.name]
-      }
-      this.performance.viewPortDataset = this.visibleFactSheets
-      this.performance.debounceFn()
-    }
+    })
   },
   async created () {
-    this.performance = new Performance()
-
+    /*
     this.performance.on('fetching-data', viewPortDataset => {
       const dataset = Object.keys(viewPortDataset)
         .sort()
@@ -83,11 +68,7 @@ export default {
         text: `${dataset[0]} / ${dataset[dataset.length - 1]}`
       })
     })
-
-    this.performance.on('dataset', dataset => {
-      this.visibleFactSheets = []
-      this.dataset = dataset
-    })
+    */
 
     const reportSetup = await this.$lx.init()
     this.setReportSetup(reportSetup)

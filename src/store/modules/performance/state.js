@@ -1,4 +1,5 @@
 export default {
+  queries: 0,
   tree: [],
   factSheetTypes: {},
   reportSetup: {},
@@ -6,5 +7,6 @@ export default {
   dataModel: {},
   view: {},
   dataset: [],
-  viewPortDataset: {}
+  viewPortDataset: {},
+  visibleFactSheets: {}
 }
