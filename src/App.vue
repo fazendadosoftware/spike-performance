@@ -18,7 +18,7 @@
         </div>
       </div>
     </div>
-    <div class="flex flex-wrap items-center justify-center absolute top-0 right-0 h-full w-3/4 overflow-auto">
+    <div class="flex items-start justify-start absolute top-0 right-0 h-full w-3/4 overflow-auto mx-2">
       <fact-sheet-card
         v-for="factSheet in dataset"
         :key="factSheet.id"
