@@ -34,7 +34,7 @@ export const setReportSetup = (state, reportSetup) => {
 }
 
 export const setDataset = (state, dataset) => {
-  state.visibleFactSheets = []
+  state.viewPortDataset = {}
   state.dataset = dataset
 }
 

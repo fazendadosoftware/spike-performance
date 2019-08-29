@@ -1,4 +1,5 @@
 import Vue from 'vue'
+
 export const generateReportConfiguration = (store, { factSheetType, vm }) => {
   const { commit, state } = store
   const { tree } = state
@@ -10,10 +11,7 @@ export const generateReportConfiguration = (store, { factSheetType, vm }) => {
     allowTableView: false,
     menuActions: {
       showConfigure: true,
-      configureCallback: () => {
-        vm.$modal.toggle('configuration-modal')
-        // vm.$modal.show('configuration-modal', { foo: 'bar' })
-      }
+      configureCallback: () => vm.$modal.toggle('configuration-modal')
     },
     facets: [
       {
@@ -28,15 +26,15 @@ export const generateReportConfiguration = (store, { factSheetType, vm }) => {
   }
 }
 
-export const updateNode = async ({ commit, dispatch, state }, { treeIdx, node }) => {
+export const updateNode = async ({ commit, dispatch, state }, { treeIdx, node, vm }) => {
   const { tree } = state
   if (treeIdx === 0) {
     const firstNode = tree[0]
     const { factSheetType } = node
-    if (firstNode.factSheetType !== factSheetType) {
-      const config = await dispatch('generateReportConfiguration', factSheetType)
-      console.log('GOT CONFIG', config)
-      // lx.updateConfiguration(config)
+    if (factSheetType !== firstNode.factSheetType) {
+      const config = await dispatch('generateReportConfiguration', { factSheetType, vm })
+      await lx.updateConfiguration(config)
+      console.debug(`UPDATED CONFIGURATION FOR ${factSheetType}`, config)
     }
   }
   commit('updateNode', { treeIdx, node })

@@ -86,13 +86,13 @@ export default {
       },
       set (factSheetType) {
         const { relations = [] } = this.factSheetTypes[factSheetType]
-        const { relationType } = relations
+        const { relationType } = Array.from([...relations])
           .sort((a, b) => {
             const labelA = a.label
             const labelB = b.label
             return labelA > labelB ? 1 : labelA < labelB ? -1 : 0
           })[0]
-        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType } })
+        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType }, vm: this })
       }
     },
     relation: {
@@ -102,7 +102,7 @@ export default {
       },
       set (relationType) {
         const { factSheetType } = this
-        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType } })
+        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType }, vm: this })
       }
     },
     relations () {
