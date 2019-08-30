@@ -17,6 +17,15 @@ const performancePlugin = store => {
       else if (!newVal && oldVal) lx.hideSpinner()
     }
   )
+
+  store.watch(
+    () => store.getters['performance/treeEndpointFactSheetTypes'],
+    async () => {
+      const { _vm } = store
+      const config = await store.dispatch('performance/generateReportConfiguration', { vm: _vm })
+      lx.updateConfiguration(config)
+    }
+  )
 }
 
 export default [performancePlugin]

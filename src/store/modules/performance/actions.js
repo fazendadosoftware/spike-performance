@@ -1,20 +1,12 @@
 // import Vue from 'vue'
 
-export const generateReportConfiguration = (store, { factSheetType, vm }) => {
-  const { commit, state } = store
+export const generateReportConfiguration = (store, { vm }) => {
+  const { commit, state, getters } = store
   const { tree } = state
+  const { treeEndpointFactSheetTypes } = getters
+  const { startPointFactSheetType, endPointFactSheetType } = treeEndpointFactSheetTypes
 
   if (!tree.length) throw Error('tree is empty')
-  const defaultFactSheetType = factSheetType || tree[0].factSheetType
-  // const lastFactSheetRelationType = tree[tree.length - 1].relationType
-  /*
-  if (factSheetTypes) {
-    console.log('FACTSHEET TYPES', factSheetTypes)
-    const { targetFactSheetType } = (factSheetTypes[factSheetType] || {}).relations || []
-      .find(relation => relation.relationType === lastFactSheetRelationType) || {}
-    console.log('LAST FACTSHEET TYPE IS', targetFactSheetType)
-  }
-  */
 
   return {
     allowEditing: false,
@@ -25,18 +17,27 @@ export const generateReportConfiguration = (store, { factSheetType, vm }) => {
     },
     facets: [
       {
-        key: defaultFactSheetType,
-        fixedFactSheetType: defaultFactSheetType,
+        key: startPointFactSheetType,
+        fixedFactSheetType: startPointFactSheetType,
         attributes: ['name'],
         callback: dataset => commit('setDataset', dataset)
+      },
+      {
+        key: endPointFactSheetType,
+        fixedFactSheetType: endPointFactSheetType,
+        attributes: ['name'],
+        callback: dataset => {
+          console.log('ENDPOINT FACTSHEETS', dataset)
+        }
       }
     ],
     reportViewCallback: view => commit('setView', view),
-    reportViewFactSheetType: defaultFactSheetType
+    reportViewFactSheetType: startPointFactSheetType
   }
 }
 
 export const updateNode = async ({ commit, dispatch, state }, { treeIdx, node, vm }) => {
+  /*
   const { tree } = state
   if (treeIdx === 0) {
     const firstNode = tree[0]
@@ -47,6 +48,7 @@ export const updateNode = async ({ commit, dispatch, state }, { treeIdx, node, v
       console.debug(`UPDATED CONFIGURATION FOR ${factSheetType}`, config)
     }
   }
+  */
   commit('updateNode', { treeIdx, node })
 }
 
