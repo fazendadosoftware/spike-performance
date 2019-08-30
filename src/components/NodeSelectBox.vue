@@ -91,7 +91,7 @@ export default {
             const labelB = b.label
             return labelA > labelB ? 1 : labelA < labelB ? -1 : 0
           })[0]
-        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType }, vm: this })
+        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
       }
     },
     relation: {
@@ -102,7 +102,7 @@ export default {
       set (relationType) {
         const { targetFactSheetType } = this.relations.find(relation => relation.relationType === relationType)
         const { factSheetType } = this
-        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType }, vm: this })
+        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
       }
     },
     relations () {

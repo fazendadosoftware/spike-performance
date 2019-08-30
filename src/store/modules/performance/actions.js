@@ -25,10 +25,7 @@ export const generateReportConfiguration = (store, { vm }) => {
       {
         key: endPointFactSheetType,
         fixedFactSheetType: endPointFactSheetType,
-        attributes: ['name'],
-        callback: dataset => {
-          console.log('ENDPOINT FACTSHEETS', dataset)
-        }
+        facetFiltersChangedCallback: filter => commit('setChildrenFilter', filter)
       }
     ],
     reportViewCallback: view => commit('setView', view),
@@ -36,19 +33,7 @@ export const generateReportConfiguration = (store, { vm }) => {
   }
 }
 
-export const updateNode = async ({ commit, dispatch, state }, { treeIdx, node, vm }) => {
-  /*
-  const { tree } = state
-  if (treeIdx === 0) {
-    const firstNode = tree[0]
-    const { factSheetType } = node
-    if (factSheetType !== firstNode.factSheetType) {
-      const config = await dispatch('generateReportConfiguration', { factSheetType, vm })
-      lx.updateConfiguration(config)
-      console.debug(`UPDATED CONFIGURATION FOR ${factSheetType}`, config)
-    }
-  }
-  */
+export const updateNode = async ({ commit }, { treeIdx, node }) => {
   commit('updateNode', { treeIdx, node })
 }
 

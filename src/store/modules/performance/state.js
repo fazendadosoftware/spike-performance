@@ -8,5 +8,5 @@ export default {
   view: {},
   dataset: [],
   viewPortDataset: {},
-  visibleFactSheets: {}
+  childrenFilter: {}
 }

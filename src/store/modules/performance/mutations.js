@@ -38,6 +38,10 @@ export const setView = (state, view) => {
   state.view = view
 }
 
+export const setChildrenFilter = (state, filter) => {
+  state.childrenFilter = filter
+}
+
 // appends a node to the tree
 export const pushNodeToTree = (state, node) => {
   const { tree, factSheetTypes } = state
