@@ -15,22 +15,8 @@ export const setReportSetup = (state, reportSetup) => {
   const factSheetTypes = mapFactSheetTypes(state)
   state.factSheetTypes = factSheetTypes
 
-  const defaultFactSheetType = Object.values(factSheetTypes)
-    .sort((typeA, typeB) => {
-      const factSheetTypeALabel = typeA.label
-      const factSheetTypeBLabel = typeB.label
-      return factSheetTypeALabel > factSheetTypeBLabel
-        ? 1
-        : factSheetTypeALabel < factSheetTypeBLabel
-          ? -1
-          : 0
-    })
-    .shift()
-  const { factSheetType, relations } = defaultFactSheetType
-
-  // add node to tree
-  const node = { factSheetType, relationType: relations.length ? relations[0].relationType : '' }
-  state.tree.push(node)
+  // Initialize tree
+  pushNodeToTree(state)
 }
 
 export const setDataset = (state, dataset) => {
@@ -56,20 +42,39 @@ export const setView = (state, view) => {
 export const pushNodeToTree = (state, node) => {
   const { tree, factSheetTypes } = state
   if (!node) {
-    const lastNode = tree[tree.length - 1]
-    let { factSheetType, relationType } = lastNode
-    const relation = factSheetTypes[factSheetType].relations
-      .find(relation => relation.relationType === relationType)
-    let { targetFactSheetType } = relation
-    targetFactSheetType = factSheetTypes[targetFactSheetType]
-    const { relations } = targetFactSheetType
-    const factSheetTypesInTree = tree.map(node => node.factSheetType)
-    const filteredRelations = relations.filter(({ targetFactSheetType }) => factSheetTypesInTree.indexOf(targetFactSheetType) < 0)
-    const targetRelationType = filteredRelations.length ? filteredRelations[0].relationType : ''
-    node = { factSheetType: targetFactSheetType.factSheetType, relationType: targetRelationType }
+    if (!tree.length) {
+      const defaultFactSheetType = Object.values(factSheetTypes)
+        .sort((typeA, typeB) => {
+          const factSheetTypeALabel = typeA.label
+          const factSheetTypeBLabel = typeB.label
+          return factSheetTypeALabel > factSheetTypeBLabel
+            ? 1
+            : factSheetTypeALabel < factSheetTypeBLabel
+              ? -1
+              : 0
+        })
+        .shift()
+      const { factSheetType, relations } = defaultFactSheetType
+      const { relationType, targetFactSheetType } = relations.length ? relations[0] : {}
+      node = { factSheetType, relationType, targetFactSheetType }
+    } else {
+      const lastNode = tree[tree.length - 1]
+      let { factSheetType, relationType } = lastNode
+      const relation = factSheetTypes[factSheetType].relations
+        .find(relation => relation.relationType === relationType)
+      let { targetFactSheetType } = relation
+      targetFactSheetType = factSheetTypes[targetFactSheetType]
+      const { relations } = targetFactSheetType
+      const factSheetTypesInTree = tree.map(node => node.factSheetType)
+      const filteredRelations = relations.filter(({ targetFactSheetType }) => factSheetTypesInTree.indexOf(targetFactSheetType) < 0)
+      const targetRelation = filteredRelations.length ? filteredRelations[0] : {}
+      node = {
+        factSheetType: targetFactSheetType.factSheetType,
+        relationType: targetRelation.relationType,
+        targetFactSheetType: targetRelation.targetFactSheetType
+      }
+    }
   }
-  console.log('ADDING NODE', node)
-  // delete node.relations
   tree.push(node)
 }
 

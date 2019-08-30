@@ -1,11 +1,21 @@
-import Vue from 'vue'
+// import Vue from 'vue'
 
 export const generateReportConfiguration = (store, { factSheetType, vm }) => {
   const { commit, state } = store
   const { tree } = state
-  console.log('STORE', store, vm)
+
   if (!tree.length) throw Error('tree is empty')
   const defaultFactSheetType = factSheetType || tree[0].factSheetType
+  // const lastFactSheetRelationType = tree[tree.length - 1].relationType
+  /*
+  if (factSheetTypes) {
+    console.log('FACTSHEET TYPES', factSheetTypes)
+    const { targetFactSheetType } = (factSheetTypes[factSheetType] || {}).relations || []
+      .find(relation => relation.relationType === lastFactSheetRelationType) || {}
+    console.log('LAST FACTSHEET TYPE IS', targetFactSheetType)
+  }
+  */
+
   return {
     allowEditing: false,
     allowTableView: false,
@@ -33,7 +43,7 @@ export const updateNode = async ({ commit, dispatch, state }, { treeIdx, node, v
     const { factSheetType } = node
     if (factSheetType !== firstNode.factSheetType) {
       const config = await dispatch('generateReportConfiguration', { factSheetType, vm })
-      await lx.updateConfiguration(config)
+      lx.updateConfiguration(config)
       console.debug(`UPDATED CONFIGURATION FOR ${factSheetType}`, config)
     }
   }
@@ -84,16 +94,18 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
     }
   }`).replace(/\s\s+/g, ' ')
   console.log('QUERY', query)
+  /*
   const datasetKeys = Object.keys(viewPortDataset)
     .sort()
+  const start = Date.now()
   Vue.notify({
     group: 'custom-report',
     // type: 'warn',
     title: `Query start, ${tree.length} hop${tree.length === 1 ? '' : 's'}`,
     text: `${datasetKeys[0]} / ${datasetKeys[datasetKeys.length - 1]}`
   })
+  */
   commit('queryStart')
-  const start = Date.now()
   const dataset = await lx.executeGraphQL(query, { filter: { ids } })
     .then(res => {
       const dataset = res.allFactSheets.edges
@@ -105,6 +117,7 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
       return dataset
     })
   commit('queryEnd')
+  /*
   const delay = Date.now() - start
   Vue.notify({
     group: 'custom-report',
@@ -116,5 +129,6 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
         : 'error',
     text: `${delay}ms`
   })
+  */
   console.log('RX_DATASET', dataset)
 }

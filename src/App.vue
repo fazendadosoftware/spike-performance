@@ -2,6 +2,9 @@
   <div id="app" class="flex relative bg-gray-700 shadow-lg border-solid border rounded" :style="`height:calc(100vh - 20px)`">
     <notifications group="custom-report" />
     <configuration-modal />
+    <div class="bg-white">
+      {{startPointFactSheetType}} {{ endPointFactSheetType}}
+    </div>
     <div class="flex flex-col justify-center items-center absolute top-0 left-0">
       <div class="flex flex-col items-start bg-blue-300 p-4 m-4 shadow-md">
         <node-select-box
@@ -46,7 +49,9 @@ export default {
       reportSetup: 'performance/reportSetup',
       tree: 'performance/tree',
       dataset: 'performance/dataset',
-      viewPortDataset: 'performance/viewPortDataset'
+      viewPortDataset: 'performance/viewPortDataset',
+      startPointFactSheetType: 'performance/startPointFactSheetType',
+      endPointFactSheetType: 'performance/endPointFactSheetType'
     })
   },
   methods: {
