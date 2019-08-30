@@ -7,6 +7,8 @@ export default {
   dataModel: {},
   view: {},
   dataset: [],
+  enrichedDataset: {},
   viewPortDataset: {},
-  childrenFilter: {}
+  childrenFilter: {},
+  hideEmptyClusters: false
 }

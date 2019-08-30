@@ -1,7 +1,7 @@
 <template>
   <div class="card-container">
     <div class="card-header">
-      {{factSheet.name}}
+      {{factSheet.name}} {{hasChildren}} {{childrenCount}}
     </div>
     <div class="card-body">
       <div v-for="child in children" :key="child.id" class="child-box">
@@ -12,6 +12,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+
 export default {
   name: 'FactSheetCard',
   props: {
@@ -20,16 +22,29 @@ export default {
       required: true
     }
   },
-  data: () => ({
-    children: [
-      { id: 1, name: 'Application 1' },
-      { id: 2, name: 'Application 2' },
-      { id: 3, name: 'Application 3' },
-      { id: 4, name: 'Application 4' },
-      { id: 5, name: 'Application 5' },
-      { id: 6, name: 'Application 6' }
-    ]
-  })
+  computed: {
+    ...mapGetters({
+      enrichedDataset: 'performance/enrichedDataset'
+    }),
+    hasChildren () {
+      const { id } = this.factSheet
+      return !!this.enrichedDataset[id]
+    },
+    childrenCount () {
+      return Object.keys(this.children).length
+    },
+    children () {
+      const { id } = this.factSheet
+      const enrichedFactSheet = this.enrichedDataset[id]
+      const { children = [] } = enrichedFactSheet || {}
+      return Object.values(children)
+    }
+  },
+  watch: {
+    children (val) {
+      if (val.length) console.log('CHILDREN', val)
+    }
+  }
 }
 </script>
 
@@ -56,7 +71,7 @@ export default {
     display flex
     flex-flow row wrap
     align-items center
-    justify-content center
+    justify-content flex-start
 
   .child-box
     $margin = 4px

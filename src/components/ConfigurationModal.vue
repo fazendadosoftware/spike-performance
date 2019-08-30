@@ -26,8 +26,8 @@
           </div>
           <div>
             <label class="checkbox">
-              <input type="checkbox" value="on">
-              Hide empty clusters
+              <input type="checkbox" v-model="hideEmptyClusters">
+              Hide empty clusters {{hideEmptyClusters}}
             </label>
           </div>
         </div>
@@ -42,6 +42,9 @@
 <script>
 export default {
   name: 'ConfigurationModal',
+  data: () => ({
+    hideEmptyClusters: false
+  }),
   methods: {
     beforeOpen (evt) {
       // console.log('BEFORE OPEN', evt)

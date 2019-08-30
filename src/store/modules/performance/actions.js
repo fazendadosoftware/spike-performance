@@ -112,7 +112,7 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
     }
   }
 
-  const dataset = await lx.executeGraphQL(query, { filter: { ids } })
+  const enrichedDataset = await lx.executeGraphQL(query, { filter: { ids } })
     .then(res => {
       const dataset = res.allFactSheets.edges
         .map(edge => {
@@ -149,5 +149,5 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
     text: `${delay}ms`
   })
   */
-  console.log('RX_DATASET', dataset, tree)
+  commit('setEnrichedDataset', enrichedDataset)
 }

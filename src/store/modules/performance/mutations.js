@@ -21,7 +21,17 @@ export const setReportSetup = (state, reportSetup) => {
 
 export const setDataset = (state, dataset) => {
   state.viewPortDataset = {}
+  state.enrichedDataset = {}
   state.dataset = dataset
+}
+
+export const setEnrichedDataset = (state, datasetFragment) => {
+  const { enrichedDataset } = state
+  Object.values(datasetFragment)
+    .forEach(factSheet => {
+      const { id } = factSheet
+      Vue.set(enrichedDataset, id, factSheet)
+    })
 }
 
 export const setViewPortDatasetFactSheet = (state, { name, id }) => {
