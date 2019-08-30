@@ -56,6 +56,7 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
     const { targetFactSheetType } = factSheetTypes[factSheetType].relations
       .find(relation => relation.relationType === relationType)
     const fragment = `
+      type
       ...on ${factSheetType} {
         id
         name
@@ -64,6 +65,7 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
           edges {
             node {
               factSheet {
+                type
                 ${isLastNode ? `...on ${targetFactSheetType} { id name }` : FRAGMENT_TOKEN}
               }
             }
@@ -80,7 +82,7 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
       }
     }
   }`).replace(/\s\s+/g, ' ')
-  console.log('QUERY', query)
+  // console.log('QUERY', query)
   /*
   const datasetKeys = Object.keys(viewPortDataset)
     .sort()
@@ -93,12 +95,42 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
   })
   */
   commit('queryStart')
+
+  // eslint-disable-next-line
+  const getNodeDependencyTree = (edge, tree, parentNodeTree = []) => {
+    const { node } = edge
+    const { factSheet } = node
+    if (parentNodeTree.length === tree.length) {
+      return { ...factSheet, parentNodeTree }
+    } else {
+      const dependencyNode = tree[parentNodeTree.length]
+      const { relationType } = dependencyNode
+      const { edges } = { ...(factSheet || node)[relationType] }
+      factSheet ? delete factSheet[relationType] : delete node[relationType]
+      parentNodeTree.unshift(factSheet || node)
+      return edges.map(edge => getNodeDependencyTree(edge, tree, [...parentNodeTree]))
+    }
+  }
+
   const dataset = await lx.executeGraphQL(query, { filter: { ids } })
     .then(res => {
       const dataset = res.allFactSheets.edges
         .map(edge => {
+          const children = getNodeDependencyTree(edge, tree)
+            .reduce((accumulator, children) => {
+              if (Array.isArray(children)) {
+                children.reduce((accumulator, child) => {
+                  const { id } = child
+                  accumulator[id] = child
+                }, accumulator)
+              } else {
+                const { id } = children
+                accumulator[id] = children
+              }
+              return accumulator
+            }, {})
           const { node } = edge
-          return node
+          return { ...node, children }
         })
         .reduce((accumulator, node) => { return { ...accumulator, [node.id]: node } }, {})
       return dataset
@@ -117,5 +149,5 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
     text: `${delay}ms`
   })
   */
-  console.log('RX_DATASET', dataset)
+  console.log('RX_DATASET', dataset, tree)
 }
