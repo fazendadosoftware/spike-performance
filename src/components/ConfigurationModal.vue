@@ -10,6 +10,12 @@
         <h3>Edit Settings</h3>
       </div>
       <div class="modal-body">
+        <node-select-box
+          v-for="(node, idx) in tree"
+          :key="idx"
+          :idx="idx"
+          :node="node"
+        />
         <div class="config-row">
           <div class="config-heading">
             Cluster By
@@ -41,11 +47,15 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
+import NodeSelectBox from './NodeSelectBox'
+
 export default {
   name: 'ConfigurationModal',
+  components: { NodeSelectBox },
   computed: {
     ...mapGetters({
-      hideEmptyClusters: 'performance/hideEmptyClusters'
+      hideEmptyClusters: 'performance/hideEmptyClusters',
+      tree: 'performance/tree'
     }),
     hideEmptyClustersSetting: {
       get () {

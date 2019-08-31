@@ -1,24 +1,8 @@
 <template>
-  <div id="app" class="flex relative bg-gray-700 shadow-lg border-solid border rounded" :style="`height:calc(100vh - 20px)`">
+  <div id="app">
     <notifications group="custom-report" />
     <configuration-modal />
-    <div class="flex flex-col justify-center items-center absolute top-0 left-0">
-      <div class="flex flex-col items-start bg-blue-300 p-4 m-4 shadow-md">
-        <node-select-box
-          v-for="(node, idx) in tree"
-          :key="idx"
-          :idx="idx"
-          :node="node"
-        />
-      </div>
-      <div class="bg-white p-4 m-4 shadow-md w-64">
-        <h4>Viewport</h4>
-        <div class="mb-1" v-for="(factSheetName, idx) in Object.keys(viewPortDataset).sort()" :key="idx">
-          {{factSheetName}}
-        </div>
-      </div>
-    </div>
-    <div class="flex items-start justify-start absolute top-0 right-0 h-full w-3/4 overflow-auto mx-2">
+    <div class="flex items-start justify-start m-4">
       <fact-sheet-card
         v-for="factSheet in dataset"
         :key="factSheet.id"
