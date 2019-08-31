@@ -97,10 +97,8 @@ export default {
 
   .card-header
     padding 8px
-    background-color #354567
     cursor pointer
     font-size 11px
-    color white
     border-bottom 2px solid #C5C5C5
     text-align center
 

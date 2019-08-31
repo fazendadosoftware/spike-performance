@@ -2,7 +2,7 @@
 import { debounce } from './helpers'
 
 const performancePlugin = store => {
-  const debounceFn = debounce(() => store.dispatch('performance/fetchViewPortDataset'), 500)
+  const debounceFn = debounce(() => store.dispatch('performance/fetchViewPortDataset'), 200)
 
   // called when the store is initialized
   store.subscribe((mutation, state) => {
