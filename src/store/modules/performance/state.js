@@ -5,10 +5,12 @@ export default {
   reportSetup: {},
   translations: {},
   dataModel: {},
+  viewModel: {},
   view: {},
   dataset: [],
   enrichedDataset: {},
   viewPortDataset: {},
   childrenFilter: {},
-  hideEmptyClusters: false
+  hideEmptyClusters: false,
+  loadingIDs: []
 }

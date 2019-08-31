@@ -26,8 +26,8 @@
           </div>
           <div>
             <label class="checkbox">
-              <input type="checkbox" v-model="hideEmptyClusters">
-              Hide empty clusters {{hideEmptyClusters}}
+              <input type="checkbox" v-model="hideEmptyClustersSetting">
+              Hide empty clusters
             </label>
           </div>
         </div>
@@ -40,12 +40,26 @@
 </template>
 
 <script>
+import { mapGetters, mapMutations } from 'vuex'
 export default {
   name: 'ConfigurationModal',
-  data: () => ({
-    hideEmptyClusters: false
-  }),
+  computed: {
+    ...mapGetters({
+      hideEmptyClusters: 'performance/hideEmptyClusters'
+    }),
+    hideEmptyClustersSetting: {
+      get () {
+        return this.hideEmptyClusters
+      },
+      set (val) {
+        this.setHideEmptyClusters(val)
+      }
+    }
+  },
   methods: {
+    ...mapMutations({
+      setHideEmptyClusters: 'performance/setHideEmptyClusters'
+    }),
     beforeOpen (evt) {
       // console.log('BEFORE OPEN', evt)
     }

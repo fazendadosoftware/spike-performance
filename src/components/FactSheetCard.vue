@@ -1,10 +1,17 @@
 <template>
   <div class="card-container">
-    <div class="card-header">
-      {{factSheet.name}} {{hasChildren}} {{childrenCount}}
+    <div class="card-header relative" :style="containerStyle">
+      {{factSheet.name}}
+      <transition name="fade">
+        <font-awesome-icon v-if="isLoading" icon="spinner" pulse class="absolute top-auto right-0 mr-2"/>
+      </transition>
     </div>
     <div class="card-body">
-      <div v-for="child in children" :key="child.id" class="child-box">
+      <div
+        v-for="child in children"
+        :key="child.id"
+        class="child-box"
+        :style="getChildStyle(child)">
         <span class="child-name">{{child.name}}</span>
       </div>
     </div>
@@ -24,25 +31,55 @@ export default {
   },
   computed: {
     ...mapGetters({
-      enrichedDataset: 'performance/enrichedDataset'
+      view: 'performance/view',
+      enrichedDataset: 'performance/enrichedDataset',
+      loadingIDs: 'performance/loadingIDs',
+      hideEmptyClusters: 'performance/hideEmptyClusters',
+      viewModel: 'performance/viewModel'
     }),
     hasChildren () {
       const { id } = this.factSheet
-      return !!this.enrichedDataset[id]
+      return !!(this.enrichedDataset[id] || []).length
     },
     childrenCount () {
       return Object.keys(this.children).length
     },
     children () {
+      const { legendItems = [] } = this.view
       const { id } = this.factSheet
       const enrichedFactSheet = this.enrichedDataset[id]
-      const { children = [] } = enrichedFactSheet || {}
-      return Object.values(children)
+      let { children = {} } = enrichedFactSheet || {}
+      children = Object.values(children)
+        .map(child => {
+          const { legendItem } = child
+          child.view = legendItems[legendItem + 1] || {}
+          return child
+        })
+      return children
+    },
+    isLoading () {
+      const { id } = this.factSheet
+      return this.loadingIDs.indexOf(id) > -1
+    },
+    isEnriched () {
+      const { id } = this.factSheet
+      return this.enrichedDataset.hasOwnProperty(id)
+    },
+    containerStyle () {
+      const { type } = this.factSheet
+      const { bgColor, color, transparency } = this.viewModel[type] || {}
+      const style = `background: ${bgColor}; color: ${color}; opacity: ${transparency || 1}`
+      console.log('FACTSHEET', style)
+      return style
     }
   },
-  watch: {
-    children (val) {
-      if (val.length) console.log('CHILDREN', val)
+  methods: {
+    getChildStyle (child) {
+      const { type, view = {} } = child
+      const factSheetViewModel = this.viewModel[type] || {}
+      const { bgColor, color, transparency } = view
+      const border = `border: 2px solid ${factSheetViewModel.bgColor || '#fff'}`
+      return `background: ${bgColor}; color: ${color}; opacity: ${transparency || 1}; ${border}`
     }
   }
 }
@@ -61,11 +98,11 @@ export default {
   .card-header
     padding 8px
     background-color #354567
-    text-align center
     cursor pointer
     font-size 11px
     color white
     border-bottom 2px solid #C5C5C5
+    text-align center
 
   .card-body
     display flex
@@ -85,8 +122,12 @@ export default {
     display flex
     align-items center
     justify-content center
-    border 2px solid red
 
   .child-name
     cursor pointer
+
+  .fade-enter-active, .fade-leave-active
+    transition opacity .3s
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */
+    opacity 0
 </style>

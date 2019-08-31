@@ -29,7 +29,7 @@ export const generateReportConfiguration = (store, { vm }) => {
       }
     ],
     reportViewCallback: view => commit('setView', view),
-    reportViewFactSheetType: startPointFactSheetType
+    reportViewFactSheetType: endPointFactSheetType
   }
 }
 
@@ -44,7 +44,7 @@ export const factSheetVisibilityEvtHandler = ({ commit, state }, { isVisible, en
   else if (viewPortDataset[name]) commit('deleteViewPortDatasetFactSheet', { name })
 }
 
-export const fetchViewPortDataset = async ({ commit, state }) => {
+export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
   const { viewPortDataset, tree, factSheetTypes } = state
   const ids = Object.values(viewPortDataset).map(item => item.id)
 
@@ -95,6 +95,7 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
   })
   */
   commit('queryStart')
+  commit('setLoadingIDs', ids)
 
   // eslint-disable-next-line
   const getNodeDependencyTree = (edge, tree, parentNodeTree = []) => {
@@ -112,42 +113,94 @@ export const fetchViewPortDataset = async ({ commit, state }) => {
     }
   }
 
-  const enrichedDataset = await lx.executeGraphQL(query, { filter: { ids } })
-    .then(res => {
-      const dataset = res.allFactSheets.edges
-        .map(edge => {
-          const children = getNodeDependencyTree(edge, tree)
-            .reduce((accumulator, children) => {
-              if (Array.isArray(children)) {
-                children.reduce((accumulator, child) => {
-                  const { id } = child
-                  accumulator[id] = child
-                }, accumulator)
-              } else {
-                const { id } = children
-                accumulator[id] = children
-              }
-              return accumulator
-            }, {})
-          const { node } = edge
-          return { ...node, children }
-        })
-        .reduce((accumulator, node) => { return { ...accumulator, [node.id]: node } }, {})
-      return dataset
+  try {
+    const enrichedDataset = await lx.executeGraphQL(query, { filter: { ids } })
+      .then(res => {
+        const dataset = res.allFactSheets.edges
+          .map(edge => {
+            const children = getNodeDependencyTree(edge, tree)
+              .reduce((accumulator, children) => {
+                if (Array.isArray(children)) {
+                  children.reduce((accumulator, child) => {
+                    const { id } = child
+                    accumulator[id] = child
+                  }, accumulator)
+                } else {
+                  const { id } = children
+                  accumulator[id] = children
+                }
+                return accumulator
+              }, {})
+            const { node } = edge
+            return { ...node, children }
+          })
+          // .reduce((accumulator, node) => { return { ...accumulator, [node.id]: node } }, {})
+        return dataset
+      })
+    /*
+    const delay = Date.now() - start
+    Vue.notify({
+      group: 'custom-report',
+      title: 'Reponse time',
+      type: delay <= 400
+        ? 'success'
+        : delay <= 1000
+          ? 'warn'
+          : 'error',
+      text: `${delay}ms`
     })
-  commit('queryEnd')
-  /*
-  const delay = Date.now() - start
-  Vue.notify({
-    group: 'custom-report',
-    title: 'Reponse time',
-    type: delay <= 400
-      ? 'success'
-      : delay <= 1000
-        ? 'warn'
-        : 'error',
-    text: `${delay}ms`
-  })
-  */
-  commit('setEnrichedDataset', enrichedDataset)
+    */
+
+    // Get the view mapping for all children factsheets (endPointFactSheets) currently in the viewport
+    const childrenFsIds = Object.keys(Object.values(enrichedDataset)
+      .map(({ children = {} }) => children)
+      .reduce((accumulator, children) => { return { ...accumulator, ...children } }, {}))
+    let { mapping = [] } = await dispatch('getViewForEndpointFactSheets', childrenFsIds)
+    mapping = mapping.reduce((accumulator, { fsId, legendId }) => {
+      accumulator[fsId] = legendId
+      return accumulator
+    }, {})
+
+    // enrich the dataset with the view mapping, legendItem attribute
+    enrichedDataset.forEach(fs => {
+      const { children } = fs
+      Object.values(children).forEach(child => {
+        const { id } = child
+        child.legendItem = mapping[id] || -1
+      })
+    })
+
+    commit('setEnrichedDataset', enrichedDataset)
+    commit('setLoadingIDs', [])
+    commit('queryEnd')
+  } catch (err) {
+    commit('setLoadingIDs', [])
+    commit('queryEnd')
+    throw err
+  }
+}
+
+export const getViewForEndpointFactSheets = async ({ getters }, childrenFsIds = []) => {
+  const { treeEndpointFactSheetTypes = {}, view = {} } = getters
+  const { endPointFactSheetType = '' } = treeEndpointFactSheetTypes
+  const { key } = view
+  const query = `
+    query($factSheetType:FactSheetType,$key:String,$filter:FilterInput,$viewOption:ViewOptionInput){
+      view(factSheetType:$factSheetType,key:$key,filter:$filter,viewOption:$viewOption){
+        viewInfos{key label type viewOptionSupport{optionalConstraint usesRangeLegend}}
+        legendItems{id bgColor color value inLegend transparency}
+        mapping{fsId legendId constraints{key value} infos}
+      }
+    }
+  `
+  const variables = {
+    factSheetType: endPointFactSheetType,
+    key,
+    filter: {
+      ids: childrenFsIds
+    }
+  }
+  const mapping = await lx.executeGraphQL(query, variables)
+    .then(({ view = {} }) => view)
+  return mapping
 }

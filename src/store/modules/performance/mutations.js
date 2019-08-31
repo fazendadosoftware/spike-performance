@@ -7,10 +7,16 @@ export const queryEnd = state => state.queries--
 
 export const setReportSetup = (state, reportSetup) => {
   const { settings } = reportSetup
-  const { dataModel, translations } = settings
+  const { dataModel, viewModel, translations } = settings
   state.reportSetup = { ...reportSetup }
   state.translations = translations
   state.dataModel = dataModel
+
+  state.viewModel = viewModel.factSheets.reduce((accumulator, factSheet) => {
+    const { type } = factSheet
+    accumulator[type] = factSheet
+    return accumulator
+  }, {})
 
   const factSheetTypes = mapFactSheetTypes(state)
   state.factSheetTypes = factSheetTypes
@@ -45,7 +51,8 @@ export const deleteViewPortDatasetFactSheet = (state, { name }) => {
 }
 
 export const setView = (state, view) => {
-  state.view = view
+  const { key, label, legendItems } = view
+  state.view = { key, label, legendItems }
 }
 
 export const setChildrenFilter = (state, filter) => {
@@ -101,4 +108,12 @@ export const popNodeFromTree = state => {
 export const updateNode = (state, { treeIdx, node }) => {
   const { tree } = state
   tree.splice(treeIdx, 1, node)
+}
+
+export const setHideEmptyClusters = (state, hideEmptyClusters) => {
+  state.hideEmptyClusters = hideEmptyClusters
+}
+
+export const setLoadingIDs = (state, loadingIDs) => {
+  state.loadingIDs = loadingIDs
 }
