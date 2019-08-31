@@ -1,4 +1,3 @@
-// https://github.com/vuejs/vuex/blob/dev/examples/todomvc/store/plugins.js
 import { debounce } from './helpers'
 
 const performancePlugin = store => {
