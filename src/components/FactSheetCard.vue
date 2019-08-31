@@ -1,6 +1,6 @@
 <template>
   <div class="card-container">
-    <div class="card-header relative" :style="containerStyle">
+    <div class="card-header relative" :style="headerStyle">
       {{factSheet.name}}
       <transition name="fade">
         <font-awesome-icon v-if="isLoading" icon="spinner" pulse class="absolute top-auto right-0 mr-2"/>
@@ -65,11 +65,10 @@ export default {
       const { id } = this.factSheet
       return this.enrichedDataset.hasOwnProperty(id)
     },
-    containerStyle () {
+    headerStyle () {
       const { type } = this.factSheet
       const { bgColor, color, transparency } = this.viewModel[type] || {}
-      const style = `background: ${bgColor}; color: ${color}; opacity: ${transparency || 1}`
-      console.log('FACTSHEET', style)
+      const style = `background: ${bgColor}; color: ${color}; opacity: ${this.isEnriched ? 1 : 0.8}`
       return style
     }
   },
