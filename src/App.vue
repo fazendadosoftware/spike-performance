@@ -19,12 +19,11 @@
 <script>
 import { mapMutations, mapGetters, mapActions } from 'vuex'
 import ConfigurationModal from './components/ConfigurationModal'
-import NodeSelectBox from './components/NodeSelectBox'
 import FactSheetCard from './components/FactSheetCard'
 
 export default {
   name: 'app',
-  components: { ConfigurationModal, NodeSelectBox, FactSheetCard },
+  components: { ConfigurationModal, FactSheetCard },
   computed: {
     ...mapGetters({
       reportSetup: 'performance/reportSetup',
