@@ -12,7 +12,7 @@
         :key="child.id"
         class="child-box"
         :style="getChildStyle(child)">
-        <span class="child-name">{{child.name}}</span>
+        <span class="child-name">{{child.name | truncate}}</span>
       </div>
     </div>
   </div>
@@ -45,7 +45,6 @@ export default {
       return Object.keys(this.children).length
     },
     children () {
-      const { legendItems = [] } = this.view
       const { id } = this.factSheet
       const enrichedFactSheet = this.enrichedDataset[id]
       let { children = {} } = enrichedFactSheet || {}
@@ -73,6 +72,12 @@ export default {
       const { bgColor, color, transparency } = view
       const border = `border: 2px solid ${factSheetViewModel.bgColor || '#fff'}`
       return `background: ${bgColor}; color: ${color}; opacity: ${transparency || 1}; ${border}`
+    }
+  },
+  filters: {
+    truncate (value) {
+      if (!value) return ''
+      return value.length > 30 ? `${value.substr(0, 30)}...` : value
     }
   }
 }
@@ -105,7 +110,7 @@ export default {
     $margin = 4px
     $padding = 4px
     width calc((100% / 3) - 12px)
-    padding $padding
+    padding 0 $padding
     margin $margin
     border-radius 4px
     box-sizing border-box
@@ -113,12 +118,11 @@ export default {
     display flex
     align-items center
     justify-content center
+    text-align center
+    word-break break-word
+    position relative
+    overflow hidden
 
   .child-name
     cursor pointer
-
-  .fade-enter-active, .fade-leave-active
-    transition opacity .3s
-  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */
-    opacity 0
 </style>

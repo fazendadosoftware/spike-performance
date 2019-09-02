@@ -2,6 +2,14 @@
   <div id="app">
     <notifications group="custom-report" />
     <configuration-modal />
+    <div v-if="true" class="flex justify-end px-5">
+      <div
+        @click="!!queries ? undefined : fetchViewPortDataset()"
+        :class="!!queries ? 'opacity-50' : 'cursor-pointer'"
+        class="border border-gray-400 rounded text-center px-2 py-1">
+        <font-awesome-icon icon="sync" :spin="!!queries"/>
+      </div>
+    </div>
     <div class="flex items-start justify-start m-4">
       <fact-sheet-card
         v-for="factSheet in dataset"
@@ -29,13 +37,15 @@ export default {
       reportSetup: 'performance/reportSetup',
       tree: 'performance/tree',
       dataset: 'performance/dataset',
-      viewPortDataset: 'performance/viewPortDataset'
+      viewPortDataset: 'performance/viewPortDataset',
+      queries: 'performance/queries'
     })
   },
   methods: {
     ...mapActions({
       generateReportConfiguration: 'performance/generateReportConfiguration',
-      factSheetVisibilityEvtHandler: 'performance/factSheetVisibilityEvtHandler'
+      factSheetVisibilityEvtHandler: 'performance/factSheetVisibilityEvtHandler',
+      fetchViewPortDataset: 'performance/fetchViewPortDataset'
     }),
     ...mapMutations({
       setReportSetup: 'performance/setReportSetup'
