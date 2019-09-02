@@ -49,12 +49,6 @@ export default {
       const { id } = this.factSheet
       const enrichedFactSheet = this.enrichedDataset[id]
       let { children = {} } = enrichedFactSheet || {}
-      children = Object.values(children)
-        .map(child => {
-          const { legendItem } = child
-          child.view = legendItems[legendItem + 1] || {}
-          return child
-        })
       return children
     },
     isLoading () {
