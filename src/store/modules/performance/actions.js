@@ -123,59 +123,15 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
           })
         return dataset
       })
-
-    // Get the view mapping for all children factsheets (endPointFactSheets) currently in the viewport
-    const childrenFsIds = Object.keys(Object.values(enrichedDataset)
-      .map(({ children = {} }) => children)
-      .reduce((accumulator, children) => { return { ...accumulator, ...children } }, {}))
-    let { mapping = [] } = await dispatch('getViewForEndpointFactSheets', childrenFsIds)
-    mapping = mapping.reduce((accumulator, { fsId, legendId }) => {
-      accumulator[fsId] = legendId
-      return accumulator
-    }, {})
-
-    // enrich the dataset with the view mapping, legendItem attribute
-    enrichedDataset.forEach(fs => {
-      const { children } = fs
-      Object.values(children).forEach(child => {
-        const { id } = child
-        child.legendItem = mapping[id] || -1
-      })
-    })
-
     commit('setEnrichedDataset', enrichedDataset)
     commit('setLoadingIDs', [])
     commit('queryEnd')
+    dispatch('updateViewForEndpointFactSheets')
   } catch (err) {
     commit('setLoadingIDs', [])
     commit('queryEnd')
     throw err
   }
-}
-
-export const getViewForEndpointFactSheets = async ({ getters }, childrenFsIds = []) => {
-  const { treeEndpointFactSheetTypes = {}, view = {} } = getters
-  const { endPointFactSheetType = '' } = treeEndpointFactSheetTypes
-  const { key } = view
-  const query = `
-    query($factSheetType:FactSheetType,$key:String,$filter:FilterInput,$viewOption:ViewOptionInput){
-      view(factSheetType:$factSheetType,key:$key,filter:$filter,viewOption:$viewOption){
-        viewInfos{key label type viewOptionSupport{optionalConstraint usesRangeLegend}}
-        legendItems{id bgColor color value inLegend transparency}
-        mapping{fsId legendId constraints{key value} infos}
-      }
-    }
-  `
-  const variables = {
-    factSheetType: endPointFactSheetType,
-    key,
-    filter: {
-      ids: childrenFsIds
-    }
-  }
-  const mapping = await lx.executeGraphQL(query, variables)
-    .then(({ view = {} }) => view)
-  return mapping
 }
 
 export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
@@ -211,29 +167,33 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
       ids: childrenFsIds
     }
   }
-  const mapping = await lx.executeGraphQL(query, variables)
-    .then(({ view = {} }) => {
-      const { mapping = [] } = view
-      return mapping.reduce((accumulator, { fsId, legendId }) => {
-        accumulator[fsId] = legendId
+  commit('queryStart')
+  try {
+    const mapping = await lx.executeGraphQL(query, variables)
+      .then(({ view = {} }) => {
+        const { mapping = [] } = view
+        return mapping.reduce((accumulator, { fsId, legendId }) => {
+          accumulator[fsId] = legendId
+          return accumulator
+        }, {})
+      })
+    const enrichedDatasetClone = Object.values(enrichedDataset)
+      .reduce((accumulator, fs) => {
+        let { id, children } = fs
+        children = Object.values(children).map(child => {
+          const { id } = child
+          const legendItem = mapping[id] || -1
+          const view = legendItems[legendItem + 1] || {}
+          return { ...child, legendItem, view }
+        })
+        accumulator[id] = { ...fs, children }
         return accumulator
       }, {})
-    })
-
-  const enrichedDatasetClone = Object.values(enrichedDataset)
-    .reduce((accumulator, fs) => {
-      let { id, children } = fs
-      children = Object.values(children).map(child => {
-        const { id } = child
-        const legendItem = mapping[id] || -1
-        const view = legendItems[legendItem + 1] || {}
-        return { ...child, legendItem, view }
-      })
-      accumulator[id] = { ...fs, children }
-      return accumulator
-    }, {})
-
-  console.log('ENRICHEDDATSAET', enrichedDatasetClone)
-  commit('setEnrichedDataset', enrichedDatasetClone)
-  return mapping
+    commit('queryEnd')
+    commit('setEnrichedDataset', enrichedDatasetClone)
+    return mapping
+  } catch (err) {
+    commit('queryEnd')
+    throw err
+  }
 }

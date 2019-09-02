@@ -122,6 +122,7 @@ export default {
     word-break break-word
     position relative
     overflow hidden
+    transition background ease 0.3s
 
   .child-name
     cursor pointer
