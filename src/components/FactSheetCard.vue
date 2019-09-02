@@ -67,7 +67,7 @@ export default {
     },
     headerStyle () {
       const { type } = this.factSheet
-      const { bgColor, color, transparency } = this.viewModel[type] || {}
+      const { bgColor, color } = this.viewModel[type] || {}
       const style = `background: ${bgColor}; color: ${color}; opacity: ${this.isEnriched ? 1 : 0.8}`
       return style
     }

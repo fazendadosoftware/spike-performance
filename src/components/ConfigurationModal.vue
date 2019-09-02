@@ -3,37 +3,41 @@
     class="modal"
     name="configuration-modal"
     :adaptive="true"
+    height="auto"
+    :resizable="true"
     @before-open="beforeOpen">
     <div class="modal-container">
       <div class="modal-header">
         <a href="javascript:;" @click="$modal.hide('configuration-modal')" class="close">x</a>
         <h3>Edit Settings</h3>
       </div>
-      <div class="modal-body">
-        <div class="config-row">
-          <div class="config-heading">
-            Cluster By
-          </div>
-          <div class="config-line">
-            <div class="config-label">Type</div>
-            <div class="config-content-wrapper">
-              <select class="config-content">
-                <option value="BusinessCapability">Business Capabilities</option>
-                <option value="UserGroup">User Groups</option>
-                <option value="Process">Processes</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label class="checkbox">
-              <input type="checkbox" v-model="hideEmptyClustersSetting">
-              Hide empty clusters
-            </label>
-          </div>
+      <div class="p-5">
+        <div class="flex flex-col items-center">
+          <node-select-box
+            v-for="(node, idx) in tree"
+            :key="idx"
+            :idx="idx"
+            :node="node"
+          />
+        </div>
+        <div class="mt-5">
+          <label class="checkbox">
+            <input type="checkbox" v-model="hideEmptyClustersSetting">
+            Hide empty clusters
+          </label>
         </div>
       </div>
       <div class="modal-footer">
-        hello frmo footer
+        <button
+          @click="$modal.hide('configuration-modal')"
+          class="w-20 bg-white hover:bg-gray-100 text-grey-600 border-solid border border-gray-400 font-bold py-2 px-4 rounded shadow focus:outline-none mr-1">
+          Cancel
+        </button>
+        <button
+          @click="$modal.hide('configuration-modal')"
+          class="w-20 btn-primary font-bold py-2 px-4 rounded shadow focus:outline-none">
+          Apply
+        </button>
       </div>
     </div>
   </modal>
@@ -41,11 +45,15 @@
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
+import NodeSelectBox from './NodeSelectBox'
+
 export default {
   name: 'ConfigurationModal',
+  components: { NodeSelectBox },
   computed: {
     ...mapGetters({
-      hideEmptyClusters: 'performance/hideEmptyClusters'
+      hideEmptyClusters: 'performance/hideEmptyClusters',
+      tree: 'performance/tree'
     }),
     hideEmptyClustersSetting: {
       get () {
@@ -95,6 +103,8 @@ export default {
   background #f5f5f5
   border-top 1px solid #ddd
   border-radius 0 0 6px 6px
+  display flex
+  justify-content flex-end
 
 .close
   float right
@@ -105,26 +115,26 @@ export default {
   text-shadow 0 1px 0 #fff
   opacity .2
 
-.config-row
-  padding 15px 0
-  margin 0
-
 .config-heading
   font-size 16px
   margin-bottom 8px
   font-weight bold
+
 .config-line
   margin-bottom 9px
+
 .config-label
   float left
   line-height 30px
   padding-right 10px
   font-weight bold
   min-width 52px
+
 .config-content-wrapper
   overflow hidden
   position relative
   line-height 30px
+
 .config-content
   width 100%
   box-sizing border-box
@@ -153,4 +163,11 @@ label.checkbox
   display inline-block
   font-weight bold
   margin 0
+
+.btn-primary
+  background #1665ee
+  border-color #1665ee
+  color white
+  &:hover
+    background darken(#1665ee, 10%)
 </style>
