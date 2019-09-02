@@ -2,7 +2,7 @@
   <div id="app">
     <notifications group="custom-report" />
     <configuration-modal />
-    <div v-if="true" class="flex justify-end px-5">
+    <div class="flex justify-end px-5">
       <div
         @click="!!queries ? undefined : fetchViewPortDataset()"
         :class="!!queries ? 'opacity-50' : 'cursor-pointer'"
