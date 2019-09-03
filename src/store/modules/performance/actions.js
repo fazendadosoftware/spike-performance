@@ -113,6 +113,7 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
   }
 
   try {
+    console.log('querying', query, { filter: { ids } })
     const enrichedDataset = await lx.executeGraphQL(query, { filter: { ids } })
       .then(res => {
         const dataset = res.allFactSheets.edges
