@@ -1,5 +1,5 @@
 <template>
-  <div class="card-container">
+  <div v-if="!hideEmptyClusters || hideEmptyClusters && childrenCount" class="card-container">
     <div class="card-header relative" :style="headerStyle">
       {{factSheet.name}}
       <transition name="fade">
@@ -37,10 +37,6 @@ export default {
       hideEmptyClusters: 'performance/hideEmptyClusters',
       viewModel: 'performance/viewModel'
     }),
-    hasChildren () {
-      const { id } = this.factSheet
-      return !!(this.enrichedDataset[id] || []).length
-    },
     childrenCount () {
       return Object.keys(this.children).length
     },
@@ -61,7 +57,7 @@ export default {
     headerStyle () {
       const { type } = this.factSheet
       const { bgColor, color } = this.viewModel[type] || {}
-      const style = `background: ${bgColor}; color: ${color}; opacity: ${this.isEnriched ? 1 : 0.8}`
+      const style = `background: ${bgColor} !important; color: ${color} !important; opacity: ${this.isEnriched ? 1 : 0.8}`
       return style
     }
   },

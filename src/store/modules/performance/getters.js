@@ -27,4 +27,6 @@ export const treeEndpointFactSheetTypes = state => {
 
 export const hideEmptyClusters = state => state.hideEmptyClusters
 
+export const fetchCompleteDataset = state => state.fetchCompleteDataset
+
 export const loadingIDs = state => state.loadingIDs

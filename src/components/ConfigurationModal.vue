@@ -20,7 +20,13 @@
             :node="node"
           />
         </div>
-        <div class="mt-5">
+        <div class="mt-6">
+          <label class="checkbox">
+            <input type="checkbox" v-model="fetchCompleteDatasetSetting">
+            Fetch complete dataset
+          </label>
+        </div>
+        <div class="mt-2" v-if="fetchCompleteDatasetSetting">
           <label class="checkbox">
             <input type="checkbox" v-model="hideEmptyClustersSetting">
             Hide empty clusters
@@ -53,6 +59,7 @@ export default {
   computed: {
     ...mapGetters({
       hideEmptyClusters: 'performance/hideEmptyClusters',
+      fetchCompleteDataset: 'performance/fetchCompleteDataset',
       tree: 'performance/tree'
     }),
     hideEmptyClustersSetting: {
@@ -62,11 +69,20 @@ export default {
       set (val) {
         this.setHideEmptyClusters(val)
       }
+    },
+    fetchCompleteDatasetSetting: {
+      get () {
+        return this.fetchCompleteDataset
+      },
+      set (val) {
+        this.setFetchCompleteDataset(val)
+      }
     }
   },
   methods: {
     ...mapMutations({
-      setHideEmptyClusters: 'performance/setHideEmptyClusters'
+      setHideEmptyClusters: 'performance/setHideEmptyClusters',
+      setFetchCompleteDataset: 'performance/setFetchCompleteDataset'
     }),
     beforeOpen (evt) {
       // console.log('BEFORE OPEN', evt)

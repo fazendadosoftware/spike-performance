@@ -114,6 +114,10 @@ export const setHideEmptyClusters = (state, hideEmptyClusters) => {
   state.hideEmptyClusters = hideEmptyClusters
 }
 
+export const setFetchCompleteDataset = (state, fetchCompleteDataset) => {
+  state.fetchCompleteDataset = fetchCompleteDataset
+}
+
 export const setLoadingIDs = (state, loadingIDs) => {
   state.loadingIDs = loadingIDs
 }

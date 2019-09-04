@@ -12,5 +12,6 @@ export default {
   viewPortDataset: {},
   childrenFilter: {},
   hideEmptyClusters: false,
+  fetchCompleteDataset: true,
   loadingIDs: []
 }

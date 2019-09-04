@@ -1,4 +1,4 @@
-export const generateReportConfiguration = (store, { vm }) => {
+export const generateReportConfiguration = (store, { vm }) => { /* eslint-disable */
   const { commit, state, getters, dispatch } = store
   const { tree } = state
   const { treeEndpointFactSheetTypes } = getters
@@ -22,17 +22,19 @@ export const generateReportConfiguration = (store, { vm }) => {
       },
       {
         key: `children-${endPointFactSheetType}`,
-        fixedFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : '',
+        fixedFactSheetType: endPointFactSheetType || '',
         attributes: ['name'],
         facetFiltersChangedCallback: filter => commit('setChildrenFilter', filter)
       }
     ],
-    reportViewCallback: view => {
-      commit('setView', view)
-      dispatch('updateViewForEndpointFactSheets')
-    },
-    reportViewFactSheetType: endPointFactSheetType
+    reportViewFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : undefined,
+    reportViewCallback: endPointFactSheetType !== startPointFactSheetType
+      ? view => {
+        commit('setView', view)
+        dispatch('updateViewForEndpointFactSheets')
+      } : undefined
   }
+
   return reportConfiguration
 }
 
@@ -52,8 +54,8 @@ export const factSheetVisibilityEvtHandler = async ({ commit, state }, { isVisib
 }
 
 export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
-  const { viewPortDataset, tree } = state
-  const ids = Object.keys(viewPortDataset)
+  const { dataset, viewPortDataset, tree, fetchCompleteDataset } = state
+  const ids = fetchCompleteDataset ? dataset.map(({ id }) => id) : Object.keys(viewPortDataset)
 
   const FRAGMENT_TOKEN = `%%NEXT_FRAGMENT%%`
   const replaceFragmentTokenRegex = new RegExp(FRAGMENT_TOKEN, 'g')
@@ -114,7 +116,8 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
   }
 
   try {
-    const enrichedDataset = await lx.executeGraphQL(query, { filter: { ids } })
+    const variables = { filter: { ids } }
+    const enrichedDataset = await lx.executeGraphQL(query, variables)
       .then(res => {
         const dataset = res.allFactSheets.edges
           .map(edge => {
