@@ -35,11 +35,15 @@ export const mapFactSheetTypes = state => {
     }, {})
   const { ITComponent } = mappedFactSheetTypes
   if (ITComponent) {
-    let { label, relations } = ITComponent
-    const extraRelations = [
-      { label: `Required ${label}`, relationType: 'relToRequires', targetFactSheetType: 'ITComponent' },
-      { label: `Required By ${label}`, relationType: 'relToRequiredBy', targetFactSheetType: 'ITComponent' }
-    ]
+    const { relations } = ITComponent
+    const extraRelations = ['relToRequires', 'relToRequiredBy']
+      .map(relationType => translations.relations[relationType])
+      .map(relation => {
+        const { field } = relation
+        delete relation.field
+        delete relation.values
+        return { ...relation, relationType: field }
+      })
     ITComponent.relations = [ ...relations, ...extraRelations ]
   }
   return mappedFactSheetTypes

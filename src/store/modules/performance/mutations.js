@@ -42,12 +42,12 @@ export const setEnrichedDataset = (state, datasetFragment) => {
 
 export const setViewPortDatasetFactSheet = (state, { name, id }) => {
   const { viewPortDataset } = state
-  Vue.set(viewPortDataset, name, { id })
+  Vue.set(viewPortDataset, id, { name })
 }
 
-export const deleteViewPortDatasetFactSheet = (state, { name }) => {
+export const deleteViewPortDatasetFactSheet = (state, { id }) => {
   const { viewPortDataset } = state
-  if (viewPortDataset[name]) delete viewPortDataset[name]
+  if (viewPortDataset[id]) delete viewPortDataset[id]
 }
 
 export const setView = (state, view) => {

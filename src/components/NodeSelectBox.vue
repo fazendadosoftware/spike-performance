@@ -101,18 +101,16 @@ export default {
         return relationType
       },
       set (relationType) {
-        console.log('SETTING RELATION TYPE', relationType)
         const { targetFactSheetType } = this.relations.find(relation => relation.relationType === relationType)
         const { factSheetType } = this
+        console.log('UPDATING NODE', relationType)
         this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
       }
     },
     relations () {
       const usedRelationTypesInTree = this.tree.map(node => node.relationType)
-      // const usedFactSheetTypesInTree = this.tree.map(node => node.factSheetType)
       const { relations = [] } = this.factSheetTypes[this.factSheetType]
       const filteredRelations = relations.filter(({ relationType }) => relationType === this.relation || usedRelationTypesInTree.indexOf(relationType) < 0)
-      // const filteredRelations = relations.filter(({ targetFactSheetType }) => usedFactSheetTypesInTree.indexOf(targetFactSheetType) < 0)
       return filteredRelations
     },
     editable () {
@@ -131,7 +129,6 @@ export default {
         const parentFactSheetType = this.factSheetTypes[this.tree[this.idx - 1].factSheetType]
         const { relations } = parentFactSheetType
         options = relations
-        console.log('OPTIONS', options)
       }
       return options
     },
@@ -146,6 +143,7 @@ export default {
       const { relationType } = this.node
       const { relations } = factSheetType
       const relation = relations.find((relation) => relation.relationType === relationType)
+      if (!relation.targetFactSheetType) return true
       const targetFactSheetType = this.factSheetTypes[relation.targetFactSheetType]
       const targetFactSheetTypeRelations = targetFactSheetType.relations
       const usedFactSheetTypesInTree = this.tree.map(node => node.factSheetType)

@@ -6,7 +6,7 @@ export const generateReportConfiguration = (store, { vm }) => {
 
   if (!tree.length) throw Error('tree is empty')
 
-  return {
+  const reportConfiguration = {
     allowEditing: false,
     allowTableView: false,
     menuActions: {
@@ -21,8 +21,9 @@ export const generateReportConfiguration = (store, { vm }) => {
         callback: dataset => commit('setDataset', dataset)
       },
       {
-        key: endPointFactSheetType,
-        fixedFactSheetType: endPointFactSheetType,
+        key: `children-${endPointFactSheetType}`,
+        fixedFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : '',
+        attributes: ['name'],
         facetFiltersChangedCallback: filter => commit('setChildrenFilter', filter)
       }
     ],
@@ -32,6 +33,7 @@ export const generateReportConfiguration = (store, { vm }) => {
     },
     reportViewFactSheetType: endPointFactSheetType
   }
+  return reportConfiguration
 }
 
 export const updateNode = async ({ commit }, { treeIdx, node }) => {
@@ -41,37 +43,37 @@ export const updateNode = async ({ commit }, { treeIdx, node }) => {
 export const factSheetVisibilityEvtHandler = async ({ commit, state }, { isVisible, entry, factSheet }) => {
   const { viewPortDataset } = state
   const { name, id } = factSheet
-  const currentState = viewPortDataset[name]
+  const currentState = viewPortDataset[id]
   if (isVisible) {
-    if (!currentState || currentState.id !== id) {
+    if (!currentState || currentState.name !== name) {
       await commit('setViewPortDatasetFactSheet', { name, id })
     }
-  } else if (viewPortDataset[name]) await commit('deleteViewPortDatasetFactSheet', { name })
+  } else if (viewPortDataset[id]) await commit('deleteViewPortDatasetFactSheet', { id })
 }
 
 export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
-  const { viewPortDataset, tree, factSheetTypes } = state
-  const ids = Object.values(viewPortDataset).map(item => item.id)
+  const { viewPortDataset, tree } = state
+  const ids = Object.keys(viewPortDataset)
 
   const FRAGMENT_TOKEN = `%%NEXT_FRAGMENT%%`
   const replaceFragmentTokenRegex = new RegExp(FRAGMENT_TOKEN, 'g')
   const query = tree.reduce((accumulator, edge, idx, tree) => {
     const isLastNode = idx === (tree.length - 1)
     const { factSheetType, relationType } = edge
-    const { targetFactSheetType } = factSheetTypes[factSheetType].relations
-      .find(relation => relation.relationType === relationType)
     const fragment = `
       type
+      id
+      name
       ...on ${factSheetType} {
-        id
-        name
         ${relationType} {
           totalCount
           edges {
             node {
               factSheet {
                 type
-                ${isLastNode ? `...on ${targetFactSheetType} { id name }` : FRAGMENT_TOKEN}
+                id
+                name
+                ${isLastNode ? `` : FRAGMENT_TOKEN}
               }
             }
           }
@@ -87,7 +89,6 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
       }
     }
   }`).replace(/\s\s+/g, ' ')
-
   commit('queryStart')
   commit('setLoadingIDs', ids)
 
@@ -113,7 +114,7 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
   }
 
   try {
-    console.log('querying', query, { filter: { ids } })
+    console.log('QUERY', query, { filter: { ids } })
     const enrichedDataset = await lx.executeGraphQL(query, { filter: { ids } })
       .then(res => {
         const dataset = res.allFactSheets.edges
