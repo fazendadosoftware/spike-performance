@@ -103,7 +103,6 @@ export default {
       set (relationType) {
         const { targetFactSheetType } = this.relations.find(relation => relation.relationType === relationType)
         const { factSheetType } = this
-        console.log('UPDATING NODE', relationType)
         this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
       }
     },
@@ -143,7 +142,7 @@ export default {
       const { relationType } = this.node
       const { relations } = factSheetType
       const relation = relations.find((relation) => relation.relationType === relationType)
-      if (!relation.targetFactSheetType) return true
+      if (!relation.targetFactSheetType || relation.targetFactSheetType === this.factSheetType) return true
       const targetFactSheetType = this.factSheetTypes[relation.targetFactSheetType]
       const targetFactSheetTypeRelations = targetFactSheetType.relations
       const usedFactSheetTypesInTree = this.tree.map(node => node.factSheetType)

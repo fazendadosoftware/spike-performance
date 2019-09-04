@@ -6,7 +6,7 @@ export default {
   translations: {},
   dataModel: {},
   viewModel: {},
-  view: {},
+  view: { mapping: [] },
   dataset: [],
   enrichedDataset: {},
   viewPortDataset: {},
