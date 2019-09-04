@@ -123,6 +123,7 @@ export default {
     position relative
     overflow hidden
     transition background ease 0.3s
+    background white
 
   .child-name
     cursor pointer
