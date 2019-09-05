@@ -10,16 +10,18 @@
         <font-awesome-icon icon="sync" :spin="!!queries"/>
       </div>
     </div>
-    <div class="flex items-start justify-start m-4">
-      <fact-sheet-card
-        v-for="factSheet in dataset"
-        :key="factSheet.id"
-        :fact-sheet="factSheet"
-        v-observe-visibility="{
-          callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
-          throttle: 0
-        }"
-        />
+    <div class="overflow-hidden mt-4 flex-1 flex flex-col">
+      <div class="flex-1 overflow-auto flex items-start justify-start">
+        <fact-sheet-card
+          v-for="factSheet in dataset"
+          :key="factSheet.id"
+          :fact-sheet="factSheet"
+          v-observe-visibility="{
+            callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
+            throttle: 0
+          }"
+          />
+      </div>
     </div>
   </div>
 </template>
@@ -32,6 +34,18 @@ import FactSheetCard from './components/FactSheetCard'
 export default {
   name: 'app',
   components: { ConfigurationModal, FactSheetCard },
+  directives: {
+    'auto-height': {
+      inserted (el) {
+        const viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+        const { offsetTop } = el
+        console.log('EL WAS INSERTED', offsetTop, viewPortHeight)
+      },
+      update (el) {
+        console.log('EL WAS UPDATED', el)
+      }
+    }
+  },
   computed: {
     ...mapGetters({
       reportSetup: 'performance/reportSetup',
@@ -68,4 +82,7 @@ export default {
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
   color #333
+  height 100vh
+  display flex
+  flex-flow column
 </style>

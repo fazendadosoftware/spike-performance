@@ -84,7 +84,7 @@ export default {
     background-color #F3F3F3
     border 2px solid #C5C5C5
     border-radius 4px
-    margin-right 1rem
+    margin-right 0.75rem
     margin-top 1rem
     min-width 300px
     min-height 100px
