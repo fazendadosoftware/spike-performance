@@ -3,9 +3,8 @@
     class="modal"
     name="configuration-modal"
     :adaptive="true"
-    height="auto"
-    :resizable="true"
-    @before-open="beforeOpen">
+    :height="'auto'"
+    :resizable="true">
     <div class="modal-container">
       <div class="modal-header">
         <a href="javascript:;" @click="$modal.hide('configuration-modal')" class="close">x</a>
@@ -84,10 +83,7 @@ export default {
     ...mapMutations({
       setHideEmptyClusters: 'performance/setHideEmptyClusters',
       setFetchCompleteDataset: 'performance/setFetchCompleteDataset'
-    }),
-    beforeOpen (evt) {
-      // console.log('BEFORE OPEN', evt)
-    }
+    })
   }
 }
 </script>
