@@ -107,9 +107,9 @@ export default {
       }
     },
     relations () {
-      const usedFactSheetTypesInTree = this.tree.map(node => node.factSheetType)
+      const usedRelationTypesInTree = this.tree.map(node => node.relationType)
       const { relations = [] } = this.factSheetTypes[this.factSheetType]
-      const filteredRelations = relations.filter(({ targetFactSheetType }) => usedFactSheetTypesInTree.indexOf(targetFactSheetType) < 0)
+      const filteredRelations = relations.filter(({ relationType }) => relationType === this.relation || usedRelationTypesInTree.indexOf(relationType) < 0)
       return filteredRelations
     },
     editable () {
@@ -142,6 +142,7 @@ export default {
       const { relationType } = this.node
       const { relations } = factSheetType
       const relation = relations.find((relation) => relation.relationType === relationType)
+      if (!relation.targetFactSheetType || relation.targetFactSheetType === this.factSheetType) return true
       const targetFactSheetType = this.factSheetTypes[relation.targetFactSheetType]
       const targetFactSheetTypeRelations = targetFactSheetType.relations
       const usedFactSheetTypesInTree = this.tree.map(node => node.factSheetType)

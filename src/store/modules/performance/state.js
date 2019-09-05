@@ -3,14 +3,16 @@ export default {
   tree: [],
   factSheetTypes: {},
   reportSetup: {},
+  baseUrl: '',
   translations: {},
   dataModel: {},
   viewModel: {},
-  view: {},
+  view: { mapping: [] },
   dataset: [],
   enrichedDataset: {},
   viewPortDataset: {},
   childrenFilter: {},
   hideEmptyClusters: false,
+  fetchCompleteDataset: true,
   loadingIDs: []
 }

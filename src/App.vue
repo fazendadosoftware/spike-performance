@@ -2,6 +2,7 @@
   <div id="app">
     <notifications group="custom-report" />
     <configuration-modal />
+    <factsheet-dependency-tree-modal />
     <div class="flex justify-end px-5">
       <div
         @click="!!queries ? undefined : fetchViewPortDataset()"
@@ -10,16 +11,18 @@
         <font-awesome-icon icon="sync" :spin="!!queries"/>
       </div>
     </div>
-    <div class="flex items-start justify-start m-4">
-      <fact-sheet-card
-        v-for="factSheet in dataset"
-        :key="factSheet.id"
-        :fact-sheet="factSheet"
-        v-observe-visibility="{
-          callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
-          throttle: 0
-        }"
-        />
+    <div class="overflow-hidden mt-4 flex-1 flex flex-col">
+      <div class="flex-1 overflow-auto flex items-start justify-start">
+        <fact-sheet-card
+          v-for="factSheet in dataset"
+          :key="factSheet.id"
+          :fact-sheet="factSheet"
+          v-observe-visibility="{
+            callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
+            throttle: 0
+          }"
+          />
+      </div>
     </div>
   </div>
 </template>
@@ -27,11 +30,12 @@
 <script>
 import { mapMutations, mapGetters, mapActions } from 'vuex'
 import ConfigurationModal from './components/ConfigurationModal'
+import FactsheetDependencyTreeModal from './components/FactsheetDependencyTreeModal'
 import FactSheetCard from './components/FactSheetCard'
 
 export default {
   name: 'app',
-  components: { ConfigurationModal, FactSheetCard },
+  components: { ConfigurationModal, FactsheetDependencyTreeModal, FactSheetCard },
   computed: {
     ...mapGetters({
       reportSetup: 'performance/reportSetup',
@@ -68,4 +72,7 @@ export default {
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
   color #333
+  height 100vh
+  display flex
+  flex-flow column
 </style>

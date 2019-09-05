@@ -1,4 +1,4 @@
-export const generateReportConfiguration = (store, { vm }) => {
+export const generateReportConfiguration = (store, { vm }) => { /* eslint-disable */
   const { commit, state, getters, dispatch } = store
   const { tree } = state
   const { treeEndpointFactSheetTypes } = getters
@@ -6,12 +6,15 @@ export const generateReportConfiguration = (store, { vm }) => {
 
   if (!tree.length) throw Error('tree is empty')
 
-  return {
+  const reportConfiguration = {
     allowEditing: false,
     allowTableView: false,
     menuActions: {
       showConfigure: true,
-      configureCallback: () => vm.$modal.toggle('configuration-modal')
+      configureCallback: () => {
+        vm.$modal.hide('factsheet-dependency-tree-modal')
+        vm.$modal.toggle('configuration-modal')
+      }
     },
     facets: [
       {
@@ -21,17 +24,21 @@ export const generateReportConfiguration = (store, { vm }) => {
         callback: dataset => commit('setDataset', dataset)
       },
       {
-        key: endPointFactSheetType,
-        fixedFactSheetType: endPointFactSheetType,
+        key: `children-${endPointFactSheetType}`,
+        fixedFactSheetType: endPointFactSheetType || '',
+        attributes: ['name'],
         facetFiltersChangedCallback: filter => commit('setChildrenFilter', filter)
       }
     ],
-    reportViewCallback: view => {
-      commit('setView', view)
-      dispatch('updateViewForEndpointFactSheets')
-    },
-    reportViewFactSheetType: endPointFactSheetType
+    reportViewFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : undefined,
+    reportViewCallback: endPointFactSheetType !== startPointFactSheetType
+      ? view => {
+        commit('setView', view)
+        dispatch('updateViewForEndpointFactSheets')
+      } : undefined
   }
+
+  return reportConfiguration
 }
 
 export const updateNode = async ({ commit }, { treeIdx, node }) => {
@@ -41,37 +48,37 @@ export const updateNode = async ({ commit }, { treeIdx, node }) => {
 export const factSheetVisibilityEvtHandler = async ({ commit, state }, { isVisible, entry, factSheet }) => {
   const { viewPortDataset } = state
   const { name, id } = factSheet
-  const currentState = viewPortDataset[name]
+  const currentState = viewPortDataset[id]
   if (isVisible) {
-    if (!currentState || currentState.id !== id) {
+    if (!currentState || currentState.name !== name) {
       await commit('setViewPortDatasetFactSheet', { name, id })
     }
-  } else if (viewPortDataset[name]) await commit('deleteViewPortDatasetFactSheet', { name })
+  } else if (viewPortDataset[id]) await commit('deleteViewPortDatasetFactSheet', { id })
 }
 
 export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
-  const { viewPortDataset, tree, factSheetTypes } = state
-  const ids = Object.values(viewPortDataset).map(item => item.id)
+  const { dataset, viewPortDataset, tree, fetchCompleteDataset } = state
+  const ids = fetchCompleteDataset ? dataset.map(({ id }) => id) : Object.keys(viewPortDataset)
 
   const FRAGMENT_TOKEN = `%%NEXT_FRAGMENT%%`
   const replaceFragmentTokenRegex = new RegExp(FRAGMENT_TOKEN, 'g')
   const query = tree.reduce((accumulator, edge, idx, tree) => {
     const isLastNode = idx === (tree.length - 1)
     const { factSheetType, relationType } = edge
-    const { targetFactSheetType } = factSheetTypes[factSheetType].relations
-      .find(relation => relation.relationType === relationType)
     const fragment = `
       type
+      id
+      name
       ...on ${factSheetType} {
-        id
-        name
         ${relationType} {
           totalCount
           edges {
             node {
               factSheet {
                 type
-                ${isLastNode ? `...on ${targetFactSheetType} { id name }` : FRAGMENT_TOKEN}
+                id
+                name
+                ${isLastNode ? `` : FRAGMENT_TOKEN}
               }
             }
           }
@@ -87,7 +94,6 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
       }
     }
   }`).replace(/\s\s+/g, ' ')
-
   commit('queryStart')
   commit('setLoadingIDs', ids)
 
@@ -113,7 +119,8 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
   }
 
   try {
-    const enrichedDataset = await lx.executeGraphQL(query, { filter: { ids } })
+    const variables = { filter: { ids } }
+    const enrichedDataset = await lx.executeGraphQL(query, variables)
       .then(res => {
         const dataset = res.allFactSheets.edges
           .map(edge => {

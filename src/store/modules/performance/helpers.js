@@ -3,7 +3,7 @@ export const mapFactSheetTypes = state => {
   const { factSheets = {} } = dataModel
   const { factSheetTypes } = translations
 
-  return Object.keys(factSheets)
+  const mappedFactSheetTypes = Object.keys(factSheets)
     .map(factSheetType => {
       const label = factSheetTypes[`${factSheetType}.plural`]
       const relations = Object.entries(dataModel.relations)
@@ -33,6 +33,20 @@ export const mapFactSheetTypes = state => {
       const { factSheetType } = t
       return { ...accumulator, [factSheetType]: t }
     }, {})
+  const { ITComponent } = mappedFactSheetTypes
+  if (ITComponent) {
+    const { relations } = ITComponent
+    const extraRelations = ['relToRequires', 'relToRequiredBy']
+      .map(relationType => translations.relations[relationType])
+      .map(relation => {
+        const { field } = relation
+        delete relation.field
+        delete relation.values
+        return { ...relation, relationType: field, targetFactSheetType: 'ITComponent' }
+      })
+    ITComponent.relations = [ ...relations, ...extraRelations ]
+  }
+  return mappedFactSheetTypes
 }
 
 export const debounce = (func, wait, immediate) => {

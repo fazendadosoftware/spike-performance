@@ -1,6 +1,6 @@
 <template>
-  <div class="card-container">
-    <div class="card-header relative" :style="headerStyle">
+  <div v-if="!hideEmptyClusters || hideEmptyClusters && childrenCount" class="card-container">
+    <div class="card-header relative" :style="headerStyle" @click="factSheetClickEvtHandler(factSheet)">
       {{factSheet.name}}
       <transition name="fade">
         <font-awesome-icon v-if="isLoading" icon="spinner" pulse class="absolute top-auto right-0 mr-2"/>
@@ -11,7 +11,10 @@
         v-for="child in children"
         :key="child.id"
         class="child-box"
-        :style="getChildStyle(child)">
+        :style="getChildStyle(child)"
+        @click="childMouseOverEvtHandler(child)"
+        @mouseover="childMouseOverEvtHandler(child)"
+        @mouseleave="childMouseLeaveEvtHandler(child)">
         <span class="child-name">{{child.name | truncate}}</span>
       </div>
     </div>
@@ -20,6 +23,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import { debounce } from '../store/modules/performance/helpers'
 
 export default {
   name: 'FactSheetCard',
@@ -29,18 +33,20 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      hoveredChild: ''
+    }
+  },
   computed: {
     ...mapGetters({
+      baseUrl: 'performance/baseUrl',
       view: 'performance/view',
       enrichedDataset: 'performance/enrichedDataset',
       loadingIDs: 'performance/loadingIDs',
       hideEmptyClusters: 'performance/hideEmptyClusters',
       viewModel: 'performance/viewModel'
     }),
-    hasChildren () {
-      const { id } = this.factSheet
-      return !!(this.enrichedDataset[id] || []).length
-    },
     childrenCount () {
       return Object.keys(this.children).length
     },
@@ -61,7 +67,7 @@ export default {
     headerStyle () {
       const { type } = this.factSheet
       const { bgColor, color } = this.viewModel[type] || {}
-      const style = `background: ${bgColor}; color: ${color}; opacity: ${this.isEnriched ? 1 : 0.8}`
+      const style = `background: ${bgColor} !important; color: ${color} !important; opacity: ${this.isEnriched ? 1 : 0.8}`
       return style
     }
   },
@@ -72,6 +78,18 @@ export default {
       const { bgColor, color, transparency } = view
       const border = `border: 2px solid ${factSheetViewModel.bgColor || '#fff'}`
       return `background: ${bgColor}; color: ${color}; opacity: ${transparency || 1}; ${border}`
+    },
+    factSheetClickEvtHandler (factSheet) {
+      const { id, type } = factSheet
+      const link = `${this.baseUrl}/factsheet/${type}/${id}`
+      this.$lx.openLink(link)
+    },
+    childMouseOverEvtHandler (factSheet) {
+      this.hoveredChild = factSheet
+    },
+    childMouseLeaveEvtHandler (factSheet) {
+      const { id } = factSheet
+      if (this.hoveredChild && this.hoveredChild.id === id) this.hoveredChild = undefined
     }
   },
   filters: {
@@ -79,6 +97,22 @@ export default {
       if (!value) return ''
       return value.length > 30 ? `${value.substr(0, 30)}...` : value
     }
+  },
+  watch: {
+    hoveredChild (factSheet) {
+      this.debounceFn()
+    }
+  },
+  created () {
+    this.debounceFn = debounce(() => {
+      if (this.hoveredChild) {
+        const factSheet = this.hoveredChild
+        this.$modal.toggle('factsheet-dependency-tree-modal', { factSheet })
+      }
+    }, 1000)
+  },
+  beforeDestroy () {
+    delete this.debounceFn
   }
 }
 </script>
@@ -88,7 +122,7 @@ export default {
     background-color #F3F3F3
     border 2px solid #C5C5C5
     border-radius 4px
-    margin-right 1rem
+    margin-right 0.75rem
     margin-top 1rem
     min-width 300px
     min-height 100px
@@ -123,6 +157,7 @@ export default {
     position relative
     overflow hidden
     transition background ease 0.3s
+    background white
 
   .child-name
     cursor pointer

@@ -7,8 +7,9 @@ export const queryEnd = state => state.queries--
 
 export const setReportSetup = (state, reportSetup) => {
   const { settings } = reportSetup
-  const { dataModel, viewModel, translations } = settings
+  const { dataModel, viewModel, translations, baseUrl } = settings
   state.reportSetup = { ...reportSetup }
+  state.baseUrl = baseUrl
   state.translations = translations
   state.dataModel = dataModel
 
@@ -42,12 +43,12 @@ export const setEnrichedDataset = (state, datasetFragment) => {
 
 export const setViewPortDatasetFactSheet = (state, { name, id }) => {
   const { viewPortDataset } = state
-  Vue.set(viewPortDataset, name, { id })
+  Vue.set(viewPortDataset, id, { name })
 }
 
-export const deleteViewPortDatasetFactSheet = (state, { name }) => {
+export const deleteViewPortDatasetFactSheet = (state, { id }) => {
   const { viewPortDataset } = state
-  if (viewPortDataset[name]) delete viewPortDataset[name]
+  if (viewPortDataset[id]) delete viewPortDataset[id]
 }
 
 export const setView = (state, view) => {
@@ -112,6 +113,10 @@ export const updateNode = (state, { treeIdx, node }) => {
 
 export const setHideEmptyClusters = (state, hideEmptyClusters) => {
   state.hideEmptyClusters = hideEmptyClusters
+}
+
+export const setFetchCompleteDataset = (state, fetchCompleteDataset) => {
+  state.fetchCompleteDataset = fetchCompleteDataset
 }
 
 export const setLoadingIDs = (state, loadingIDs) => {

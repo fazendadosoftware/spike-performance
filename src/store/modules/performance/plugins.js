@@ -4,10 +4,14 @@ const performancePlugin = store => {
   const debounceFn = debounce(() => store.dispatch('performance/fetchViewPortDataset'), 200)
 
   // called when the store is initialized
+
   store.subscribe((mutation, state) => {
-    const { type } = mutation
-    if (type === 'performance/setViewPortDatasetFactSheet') debounceFn()
+    if (mutation.type === 'performance/setDataset') debounceFn()
+    if (mutation.type === 'performance/setViewPortDatasetFactSheet' && !state.performance.fetchCompleteDataset) debounceFn()
   })
+
+  // update viewport whenever the "fetchCompleteDataset" setting changes
+  store.watch(() => store.getters['performance/fetchCompleteDataset'], () => debounceFn())
 
   store.watch(
     () => store.getters['performance/queries'],
