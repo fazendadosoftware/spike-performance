@@ -25,20 +25,18 @@ export const generateReportConfiguration = (store, { vm }) => { /* eslint-disabl
       },
       {
         key: `children-${endPointFactSheetType}`,
-        fixedFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : '',
+        fixedFactSheetType: endPointFactSheetType || '',
         attributes: ['name'],
         callback: dataset => commit('setChildrenFilter', dataset)
-        // facetFiltersChangedCallback: filter => commit('setChildrenFilter', filter)
       }
     ],
-    reportViewFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : undefined,
-    reportViewCallback: endPointFactSheetType !== startPointFactSheetType
+    reportViewFactSheetType: endPointFactSheetType || null,
+    reportViewCallback: !!endPointFactSheetType
       ? view => {
         commit('setView', view)
         dispatch('updateViewForEndpointFactSheets')
       } : undefined
   }
-
   return reportConfiguration
 }
 
@@ -145,7 +143,7 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
 export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
   const { treeEndpointFactSheetTypes = {}, view = {}, enrichedDataset } = getters
   const { endPointFactSheetType = '' } = treeEndpointFactSheetTypes
-  const { key, legendItems } = view
+  const { key, legendItems = [] } = view
 
   const childrenFsIds = Object.keys(Object.values(enrichedDataset)
     .map(({ children = {} }) => children)
@@ -180,7 +178,7 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
     const mapping = await lx.executeGraphQL(query, variables)
       .then(({ view = {} }) => {
         const { mapping = [] } = view
-        return mapping.reduce((accumulator, { fsId, legendId }) => {
+        return (mapping || []).reduce((accumulator, { fsId, legendId }) => {
           accumulator[fsId] = legendId
           return accumulator
         }, {})
@@ -191,7 +189,7 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
         children = Object.values(children).map(child => {
           const { id } = child
           const legendItem = mapping[id] || -1
-          const view = legendItems[legendItem + 1] || {}
+          const view = legendItems.length > legendItem + 1 ? legendItems[legendItem + 1] : {}
           return { ...child, legendItem, view }
         })
         accumulator[id] = { ...fs, children }

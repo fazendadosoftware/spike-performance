@@ -55,7 +55,13 @@ export default {
       const { id } = this.factSheet
       const enrichedFactSheet = this.enrichedDataset[id]
       let { children = [] } = enrichedFactSheet || {}
-      children = children.filter(({ id }) => this.childrenFilter.hasOwnProperty(id))
+      children = Object.values(children
+        .filter(({ id }) => this.childrenFilter.hasOwnProperty(id) && id !== this.factSheet.id)
+        .reduce((accumulator, child) => {
+          const { id } = child
+          accumulator[id] = child
+          return accumulator
+        }, {}))
       return children
     },
     isLoading () {
@@ -96,7 +102,7 @@ export default {
   },
   filters: {
     truncate (value) {
-      const maxLen = 32
+      const maxLen = 26
       if (!value) return ''
       return value.length > maxLen ? `${value.substr(0, maxLen)}...` : value
     }

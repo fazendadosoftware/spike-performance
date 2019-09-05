@@ -26,7 +26,7 @@
         </div>
         <div class="border pt-1 flex flex-wrap justify-center">
           <div
-            v-for="node in parentNodeTree"
+            v-for="node in legendFactSheetTypes"
             :key="node.type"
             :style="getFactSheetTypeStyle(node.type)"
             class="mr-1 mb-1 p-1 rounded text-xs">
@@ -161,11 +161,20 @@ export default {
 
       parentNodeTree = [...parentNodeTree]
       parentNodeTree.unshift(thisNode)
-      return parentNodeTree.reverse()
+      return parentNodeTree
+        .reverse()
         .map(node => {
           const { type } = node
           const label = type ? this.$lx.translateFactSheetType(type) : ''
           return { ...node, label }
+        })
+    },
+    legendFactSheetTypes () {
+      return this.parentNodeTree
+        .filter(({ type }, idx, tree) => {
+          const typesTree = tree.slice(0, idx).map(({ type }) => type)
+          const typeAlreadyIncluded = typesTree.indexOf(type) > -1
+          return !type || !typeAlreadyIncluded
         })
     }
   }
