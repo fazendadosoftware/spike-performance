@@ -56,8 +56,13 @@ export const setView = (state, view) => {
   state.view = { key, label, legendItems }
 }
 
-export const setChildrenFilter = (state, filter) => {
-  state.childrenFilter = filter
+export const setChildrenFilter = (state, dataset) => {
+  const childrenFilter = dataset
+    .reduce((accumulator, child) => {
+      accumulator[child.id] = child
+      return accumulator
+    }, {})
+  state.childrenFilter = childrenFilter
 }
 
 // appends a node to the tree

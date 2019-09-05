@@ -16,6 +16,8 @@ export const tree = state => state.tree
 
 export const dataset = state => state.dataset
 
+export const childrenFilter = state => state.childrenFilter
+
 export const enrichedDataset = state => state.enrichedDataset
 
 export const viewPortDataset = state => state.viewPortDataset

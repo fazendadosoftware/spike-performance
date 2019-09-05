@@ -17,12 +17,6 @@
       <div class="modal-header">
         <a href="javascript:;" @click="$modal.hide('factsheet-dependency-tree-modal')" class="close">x</a>
         <h3>Relationship Tree</h3>
-        <!--
-        <h3 class="truncate">{{name}}</h3>
-        <div class="mt-2">
-           <span class="p-1 rounded" :style="getFactSheetTypeStyle(type)">{{type}}</span>
-        </div>
-        -->
       </div>
       <div class="p-5">
         <div

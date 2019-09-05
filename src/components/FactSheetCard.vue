@@ -43,6 +43,7 @@ export default {
       baseUrl: 'performance/baseUrl',
       view: 'performance/view',
       enrichedDataset: 'performance/enrichedDataset',
+      childrenFilter: 'performance/childrenFilter',
       loadingIDs: 'performance/loadingIDs',
       hideEmptyClusters: 'performance/hideEmptyClusters',
       viewModel: 'performance/viewModel'
@@ -53,7 +54,8 @@ export default {
     children () {
       const { id } = this.factSheet
       const enrichedFactSheet = this.enrichedDataset[id]
-      let { children = {} } = enrichedFactSheet || {}
+      let { children = [] } = enrichedFactSheet || {}
+      children = children.filter(({ id }) => this.childrenFilter.hasOwnProperty(id))
       return children
     },
     isLoading () {
@@ -94,8 +96,9 @@ export default {
   },
   filters: {
     truncate (value) {
+      const maxLen = 32
       if (!value) return ''
-      return value.length > 30 ? `${value.substr(0, 30)}...` : value
+      return value.length > maxLen ? `${value.substr(0, maxLen)}...` : value
     }
   },
   watch: {

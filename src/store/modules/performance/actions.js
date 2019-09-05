@@ -25,9 +25,10 @@ export const generateReportConfiguration = (store, { vm }) => { /* eslint-disabl
       },
       {
         key: `children-${endPointFactSheetType}`,
-        fixedFactSheetType: endPointFactSheetType || '',
+        fixedFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : '',
         attributes: ['name'],
-        facetFiltersChangedCallback: filter => commit('setChildrenFilter', filter)
+        callback: dataset => commit('setChildrenFilter', dataset)
+        // facetFiltersChangedCallback: filter => commit('setChildrenFilter', filter)
       }
     ],
     reportViewFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : undefined,

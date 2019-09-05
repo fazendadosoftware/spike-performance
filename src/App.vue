@@ -4,6 +4,7 @@
     <configuration-modal />
     <factsheet-dependency-tree-modal />
     <div class="flex justify-end px-5">
+      {{queries}}
       <div
         @click="!!queries ? undefined : fetchViewPortDataset()"
         :class="!!queries ? 'opacity-50' : 'cursor-pointer'"
