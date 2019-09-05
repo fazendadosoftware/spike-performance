@@ -16,7 +16,7 @@
     <div class="modal-container">
       <div class="modal-header">
         <a href="javascript:;" @click="$modal.hide('factsheet-dependency-tree-modal')" class="close">x</a>
-        <h3>Dependency Tree</h3>
+        <h3>Relationship Tree</h3>
         <!--
         <h3 class="truncate">{{name}}</h3>
         <div class="mt-2">
