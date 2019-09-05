@@ -9,11 +9,12 @@
     <div class="modal-container">
       <div class="modal-header">
         <a href="javascript:;" @click="$modal.hide('factsheet-dependency-tree-modal')" class="close">x</a>
-        <h3>Edit Settings</h3>
+        <h3>{{name}}</h3>
+        {{type}}
       </div>
       <div class="p-5">
         <div class="flex flex-col items-center">
-          <pre>{{factSheet}}</pre>
+          <pre>{{parentNodeTree}}</pre>
         </div>
       </div>
     </div>
@@ -34,6 +35,25 @@ export default {
       const { params = {} } = evt
       const { factSheet = {} } = params
       this.factSheet = factSheet
+    }
+  },
+  computed: {
+    name () {
+      const { name } = this.factSheet || {}
+      return name
+    },
+    type () {
+      const { type } = this.factSheet || {}
+      return type
+    },
+    parentNodeTree () {
+      const { type, id, name } = this.factSheet || {}
+      const thisNode = { type, id, name }
+      let { parentNodeTree = [] } = this.factSheet || {}
+
+      parentNodeTree = [...parentNodeTree]
+      parentNodeTree.unshift(thisNode)
+      return parentNodeTree.reverse()
     }
   }
 }
