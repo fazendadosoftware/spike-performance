@@ -4,40 +4,142 @@
     name="factsheet-dependency-tree-modal"
     :adaptive="true"
     height="auto"
+    :width="'400px'"
     :resizable="true"
-    @before-open="beforeOpen">
+    @before-open="beforeOpen"
+    @opened="opened"
+    @closed="closed"
+    >
     <div class="modal-container">
       <div class="modal-header">
         <a href="javascript:;" @click="$modal.hide('factsheet-dependency-tree-modal')" class="close">x</a>
-        <h3>{{name}}</h3>
-        {{type}}
+        <h3>Dependency Tree</h3>
+        <!--
+        <h3 class="truncate">{{name}}</h3>
+        <div class="mt-2">
+           <span class="p-1 rounded" :style="getFactSheetTypeStyle(type)">{{type}}</span>
+        </div>
+        -->
       </div>
       <div class="p-5">
-        <div class="flex flex-col items-center">
-          <pre>{{parentNodeTree}}</pre>
+        <div
+          class="flex flex-col items-center"
+          ref="chart-container"
+          style="min-height: 500px">
         </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          @click="$modal.hide('factsheet-dependency-tree-modal')"
+          class="w-20 bg-white hover:bg-gray-100 text-grey-600 border-solid border border-gray-400 font-bold py-2 px-4 rounded shadow focus:outline-none mr-1">
+          Close
+        </button>
       </div>
     </div>
   </modal>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import { Network } from 'vis-network'
 
 export default {
   name: 'FactsheetDependencyTreeModal',
-  data () {
-    return {
-      factSheet: {}
-    }
-  },
+  data: () => ({
+    factSheet: {},
+    network: undefined
+  }),
   methods: {
+    handleChildClickEvt (evt) {
+      const { nodes = [] } = evt
+      const childId = nodes.shift()
+      const child = this.parentNodeTree.find(node => node.id === childId)
+      if (!child) return
+      const { id, type } = child
+      const link = `${this.baseUrl}/factsheet/${type}/${id}`
+      this.$lx.openLink(link)
+    },
+    getFactSheetTypeStyle (type) {
+      const { color, bgColor } = this.viewModel[type] || {}
+      return `background: ${bgColor}; color: ${color}`
+    },
     beforeOpen (evt) {
       const { params = {} } = evt
       const { factSheet = {} } = params
       this.factSheet = factSheet
+    },
+    opened (evt) {
+      const nodes = this.parentNodeTree
+        .map(({ id, type, name }, idx) => {
+          const label = name.length > 60 ? name.substring(0, 60) + '...' : name
+          const fsTypeViewModel = this.viewModel[type] || {}
+          const { color, bgColor } = fsTypeViewModel
+          const font = { color }
+          return { id, type, name, label, color: bgColor, font }
+        })
+      const edges = this.parentNodeTree
+        .map((node, idx, tree) => {
+          const isLastNode = idx === (tree.length - 1)
+          if (!isLastNode) {
+            const nextNode = tree[idx + 1]
+            const from = node.id
+            const to = nextNode.id
+            return { from, to }
+          }
+        })
+        .filter(link => !!link)
+      const containerEl = this.$refs['chart-container']
+      const { offsetHeight } = containerEl
+      const data = { nodes, edges }
+      const options = {
+        autoResize: true,
+        height: `${offsetHeight}px`,
+        clickToUse: true,
+        nodes: {
+          shape: 'box',
+          widthConstraint: {
+            minimum: 150,
+            maximum: 150
+          },
+          heightConstraint: {
+            minimum: 40
+          }
+        },
+        edges: {
+          arrows: 'to'
+        },
+        interaction: {
+          dragNodes: false,
+          dragView: false,
+          zoomView: false
+        },
+        layout: {
+          hierarchical: {
+            enabled: true,
+            levelSeparation: 90,
+            direction: 'UD'
+          }
+        },
+        physics: {
+          enabled: false
+        }
+      }
+      this.network = new Network(containerEl, data, options)
+      this.network.on('click', this.handleChildClickEvt)
+    },
+    closed (evt) {
+      if (this.network) {
+        this.network.off('click')
+        this.network.destroy()
+      }
     }
+
   },
   computed: {
+    ...mapGetters({
+      viewModel: 'performance/viewModel',
+      baseUrl: 'performance/baseUrl'
+    }),
     name () {
       const { name } = this.factSheet || {}
       return name
@@ -71,6 +173,7 @@ export default {
 .modal-header
   padding 9px 15px
   border-bottom 1px solid #eee
+  background #f5f5f5
   & h3
     margin 0
     line-height 30px
@@ -148,10 +251,13 @@ label.checkbox
   font-weight bold
   margin 0
 
-.btn-primary
-  background #1665ee
-  border-color #1665ee
-  color white
-  &:hover
-    background darken(#1665ee, 10%)
+.truncate
+  white-space nowrap
+  overflow hidden
+  text-overflow ellipsis
+</style>
+
+<style lang="stylus">
+.vis-network
+  outline none
 </style>

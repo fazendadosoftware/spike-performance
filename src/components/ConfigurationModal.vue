@@ -104,6 +104,7 @@ export default {
 .modal-header
   padding 9px 15px
   border-bottom 1px solid #eee
+  background #f5f5f5
   & h3
     margin 0
     line-height 30px

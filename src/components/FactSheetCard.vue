@@ -12,7 +12,7 @@
         :key="child.id"
         class="child-box"
         :style="getChildStyle(child)"
-        @click="factSheetClickEvtHandler(child)"
+        @click="childMouseOverEvtHandler(child)"
         @mouseover="childMouseOverEvtHandler(child)"
         @mouseleave="childMouseLeaveEvtHandler(child)">
         <span class="child-name">{{child.name | truncate}}</span>
@@ -109,7 +109,7 @@ export default {
         const factSheet = this.hoveredChild
         this.$modal.toggle('factsheet-dependency-tree-modal', { factSheet })
       }
-    }, 700)
+    }, 1000)
   },
   beforeDestroy () {
     delete this.debounceFn

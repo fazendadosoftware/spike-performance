@@ -11,7 +11,10 @@ export const generateReportConfiguration = (store, { vm }) => { /* eslint-disabl
     allowTableView: false,
     menuActions: {
       showConfigure: true,
-      configureCallback: () => vm.$modal.toggle('configuration-modal')
+      configureCallback: () => {
+        vm.$modal.hide('factsheet-dependency-tree-modal')
+        vm.$modal.toggle('configuration-modal')
+      }
     },
     facets: [
       {
