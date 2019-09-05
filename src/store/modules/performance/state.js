@@ -3,6 +3,7 @@ export default {
   tree: [],
   factSheetTypes: {},
   reportSetup: {},
+  baseUrl: '',
   translations: {},
   dataModel: {},
   viewModel: {},

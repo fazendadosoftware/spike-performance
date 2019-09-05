@@ -37,9 +37,10 @@
         <button
           @click="$modal.hide('configuration-modal')"
           class="w-20 bg-white hover:bg-gray-100 text-grey-600 border-solid border border-gray-400 font-bold py-2 px-4 rounded shadow focus:outline-none mr-1">
-          Cancel
+          Close
         </button>
         <button
+          v-if="false"
           @click="$modal.hide('configuration-modal')"
           class="w-20 btn-primary font-bold py-2 px-4 rounded shadow focus:outline-none">
           Apply
@@ -130,6 +131,7 @@ export default {
   color #000
   text-shadow 0 1px 0 #fff
   opacity .2
+  font-size 1.0rem
 
 .config-heading
   font-size 16px

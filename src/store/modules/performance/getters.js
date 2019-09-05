@@ -2,6 +2,8 @@ export const queries = state => state.queries
 
 export const reportSetup = state => state.reportSetup
 
+export const baseUrl = state => state.baseUrl
+
 export const workspaceSettings = state => state.reportSetup ? state.reportSetup.settings : undefined
 
 export const viewModel = state => state.viewModel

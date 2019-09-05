@@ -2,6 +2,7 @@
   <div id="app">
     <notifications group="custom-report" />
     <configuration-modal />
+    <factsheet-dependency-tree-modal />
     <div class="flex justify-end px-5">
       <div
         @click="!!queries ? undefined : fetchViewPortDataset()"
@@ -29,23 +30,12 @@
 <script>
 import { mapMutations, mapGetters, mapActions } from 'vuex'
 import ConfigurationModal from './components/ConfigurationModal'
+import FactsheetDependencyTreeModal from './components/FactsheetDependencyTreeModal'
 import FactSheetCard from './components/FactSheetCard'
 
 export default {
   name: 'app',
-  components: { ConfigurationModal, FactSheetCard },
-  directives: {
-    'auto-height': {
-      inserted (el) {
-        const viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
-        const { offsetTop } = el
-        console.log('EL WAS INSERTED', offsetTop, viewPortHeight)
-      },
-      update (el) {
-        console.log('EL WAS UPDATED', el)
-      }
-    }
-  },
+  components: { ConfigurationModal, FactsheetDependencyTreeModal, FactSheetCard },
   computed: {
     ...mapGetters({
       reportSetup: 'performance/reportSetup',

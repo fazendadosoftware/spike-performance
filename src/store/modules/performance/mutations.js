@@ -7,8 +7,9 @@ export const queryEnd = state => state.queries--
 
 export const setReportSetup = (state, reportSetup) => {
   const { settings } = reportSetup
-  const { dataModel, viewModel, translations } = settings
+  const { dataModel, viewModel, translations, baseUrl } = settings
   state.reportSetup = { ...reportSetup }
+  state.baseUrl = baseUrl
   state.translations = translations
   state.dataModel = dataModel
 
