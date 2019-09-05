@@ -30,6 +30,15 @@
           ref="chart-container"
           style="min-height: 500px">
         </div>
+        <div class="border pt-1 flex flex-wrap justify-center">
+          <div
+            v-for="node in parentNodeTree"
+            :key="node.type"
+            :style="getFactSheetTypeStyle(node.type)"
+            class="mr-1 mb-1 p-1 rounded text-xs">
+            {{node.label}}
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button
@@ -159,13 +168,18 @@ export default {
       parentNodeTree = [...parentNodeTree]
       parentNodeTree.unshift(thisNode)
       return parentNodeTree.reverse()
+        .map(node => {
+          const { type } = node
+          const label = type ? this.$lx.translateFactSheetType(type) : ''
+          return { ...node, label }
+        })
     }
   }
 }
 </script>
 
 <style lang="stylus" scoped>
-.v--modal-overlay[data-modal="configuration-modal"]
+.v--modal-overlay[data-modal="factsheet-dependency-tree-modal"]
   background rgba(0, 0, 0, 0.5)
 
 .modal-container
