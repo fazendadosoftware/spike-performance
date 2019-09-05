@@ -143,7 +143,7 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
 export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
   const { treeEndpointFactSheetTypes = {}, view = {}, enrichedDataset } = getters
   const { endPointFactSheetType = '' } = treeEndpointFactSheetTypes
-  const { key, legendItems = [] } = view
+  const { key } = view
 
   const childrenFsIds = Object.keys(Object.values(enrichedDataset)
     .map(({ children = {} }) => children)
@@ -175,9 +175,11 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
   }
   commit('queryStart')
   try {
+    let legendItems = []
     const mapping = await lx.executeGraphQL(query, variables)
       .then(({ view = {} }) => {
         const { mapping = [] } = view
+        legendItems = view.legendItems
         return (mapping || []).reduce((accumulator, { fsId, legendId }) => {
           accumulator[fsId] = legendId
           return accumulator
@@ -188,7 +190,7 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
         let { id, children } = fs
         children = Object.values(children).map(child => {
           const { id } = child
-          const legendItem = mapping[id] || -1
+          const legendItem = mapping[id]
           const view = legendItems.length > legendItem + 1 ? legendItems[legendItem + 1] : {}
           return { ...child, legendItem, view }
         })
