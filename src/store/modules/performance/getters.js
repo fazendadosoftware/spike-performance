@@ -34,3 +34,8 @@ export const hideEmptyClusters = state => state.hideEmptyClusters
 export const fetchCompleteDataset = state => state.fetchCompleteDataset
 
 export const loadingIDs = state => state.loadingIDs
+
+export const reportConfigurationState = state => {
+  const { tree, hideEmptyClusters, fetchCompleteDataset } = state
+  return { tree, hideEmptyClusters, fetchCompleteDataset }
+}

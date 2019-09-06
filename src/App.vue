@@ -52,14 +52,21 @@ export default {
       fetchViewPortDataset: 'performance/fetchViewPortDataset'
     }),
     ...mapMutations({
-      setReportSetup: 'performance/setReportSetup'
+      setReportSetup: 'performance/setReportSetup',
+      setCustomState: 'performance/setCustomState',
+      setDefaultConfiguration: 'performance/setDefaultConfiguration'
     })
   },
   async created () {
     const reportSetup = await this.$lx.init()
+    console.debug(`Report Setup`, reportSetup)
+    const { config = {}, savedState = {} } = reportSetup
+    const { customState } = savedState || {}
+    this.setDefaultConfiguration(config)
+    if (customState) this.setCustomState(customState)
     this.setReportSetup(reportSetup)
-    const config = await this.generateReportConfiguration({ vm: this })
-    this.$lx.ready(config)
+    const reportConfiguration = await this.generateReportConfiguration({ vm: this })
+    this.$lx.ready(reportConfiguration)
   }
 }
 </script>
