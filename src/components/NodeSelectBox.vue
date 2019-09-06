@@ -44,13 +44,15 @@
       <div class="flex ml-2 w-24" v-if="isLastInTree">
         <button
           v-if="!isFirstInTree"
-          @click="popNodeFromTree()"
+          @click="$emit('pop-node')"
+          @click2="popNodeFromTree()"
           class="outline-none shadow-md cursor-pointer bg-red-500 hover:bg-red-700 border border-red-700 text-white font-semi-bold rounded m-1 p-1 w-12">
           <font-awesome-icon icon="minus" />
         </button>
         <button
           v-if="!isStub"
-          @click="pushNodeToTree()"
+          @click="$emit('push-node')"
+          @click2="pushNodeToTree()"
           class="outline-none shadow-md cursor-pointer bg-green-500 hover:bg-green-700 border border-green-700 text-white font-semi-bold rounded m-1 p-1 w-12">
           <font-awesome-icon icon="plus" />
         </button>
@@ -72,12 +74,15 @@ export default {
     idx: {
       type: Number,
       required: true
+    },
+    tree: {
+      type: Array,
+      required: true
     }
   },
   computed: {
     ...mapGetters({
-      factSheetTypes: 'performance/factSheetTypes',
-      tree: 'performance/tree'
+      factSheetTypes: 'performance/factSheetTypes'
     }),
     factSheetType: {
       get () {
@@ -92,7 +97,8 @@ export default {
             const labelB = b.label
             return labelA > labelB ? 1 : labelA < labelB ? -1 : 0
           })[0]
-        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
+        this.$emit('update-node', { treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
+        // this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
       }
     },
     relation: {
@@ -103,7 +109,8 @@ export default {
       set (relationType) {
         const { targetFactSheetType } = this.relations.find(relation => relation.relationType === relationType)
         const { factSheetType } = this
-        this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
+        this.$emit('update-node', { treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
+        // this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
       }
     },
     relations () {

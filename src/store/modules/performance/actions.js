@@ -205,3 +205,45 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
     throw err
   }
 }
+
+// pushes node to local tree, doesn't commit any changes to the state
+export const pushNodeToTree = ({ state }, { tree, node }) => {
+  const { factSheetTypes } = state
+  if (!node) {
+    if (!tree.length) {
+      const defaultFactSheetType = Object.values(factSheetTypes)
+        .sort((typeA, typeB) => {
+          const factSheetTypeALabel = typeA.label
+          const factSheetTypeBLabel = typeB.label
+          return factSheetTypeALabel > factSheetTypeBLabel
+            ? 1
+            : factSheetTypeALabel < factSheetTypeBLabel
+              ? -1
+              : 0
+        })
+        .shift()
+      const { factSheetType, relations } = defaultFactSheetType
+      const { relationType, targetFactSheetType } = relations.length ? relations[0] : {}
+      node = { factSheetType, relationType, targetFactSheetType }
+    } else {
+      const lastNode = tree[tree.length - 1]
+      let { factSheetType, relationType } = lastNode
+      const relation = factSheetTypes[factSheetType].relations
+        .find(relation => relation.relationType === relationType)
+      let { targetFactSheetType } = relation
+      targetFactSheetType = factSheetTypes[targetFactSheetType]
+      const { relations } = targetFactSheetType
+      const factSheetTypesInTree = tree.map(node => node.factSheetType)
+      const filteredRelations = relations.filter(({ targetFactSheetType }) => factSheetTypesInTree.indexOf(targetFactSheetType) < 0)
+      const targetRelation = filteredRelations.length ? filteredRelations[0] : {}
+      node = {
+        factSheetType: targetFactSheetType.factSheetType,
+        relationType: targetRelation.relationType,
+        targetFactSheetType: targetRelation.targetFactSheetType
+      }
+    }
+  }
+  tree.push(node)
+  return tree
+}
+

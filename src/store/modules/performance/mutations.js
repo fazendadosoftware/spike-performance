@@ -65,6 +65,10 @@ export const setChildrenFilter = (state, dataset) => {
   state.childrenFilter = childrenFilter
 }
 
+export const setTree = (state, tree = []) => {
+  state.tree = tree
+}
+
 // appends a node to the tree
 export const pushNodeToTree = (state, node) => {
   const { tree, factSheetTypes } = state
