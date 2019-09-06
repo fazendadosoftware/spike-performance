@@ -104,7 +104,7 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
     } else {
       const dependencyNode = tree[parentNodeTree.length]
       const { relationType } = dependencyNode
-      const { edges } = { ...(factSheet || node)[relationType] }
+      const { edges = [] } = { ...(factSheet || node)[relationType] }
       factSheet ? delete factSheet[relationType] : delete node[relationType]
       parentNodeTree.unshift(factSheet || node)
       return edges

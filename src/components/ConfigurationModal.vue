@@ -30,7 +30,7 @@
             Fetch complete dataset
           </label>
         </div>
-        <div class="mt-2" v-if="localFetchCompleteDatasetSetting">
+        <div class="mt-2">
           <label class="checkbox">
             <input type="checkbox" v-model="localHideEmptyClustersSetting">
             Hide empty clusters
