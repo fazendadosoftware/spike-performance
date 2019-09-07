@@ -21,6 +21,6 @@ yarn-error.log*
 *.sw?
 
 # LeanIX specific files
-lxr.json
+lxr*.json
 *.tgz
 

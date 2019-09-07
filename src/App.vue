@@ -1,106 +1,72 @@
 <template>
-  <div id="app" class="flex relative bg-gray-700 shadow-lg border-solid border rounded" :style="`height:calc(100vh - 20px)`">
+  <div id="app">
     <notifications group="custom-report" />
-    <div class="flex flex-col justify-center items-center absolute top-0 left-0 w-1/4">
-      <div class="flex flex-col items-start bg-blue-300 p-4 m-4 shadow-md">
-        <node-select-box
-          v-for="(node, idx) in tree"
-          :key="idx"
-          :idx="idx"
-          :node="node"
-          :factSheetTypes="factSheetTypes"
-          :tree="tree"
-          @node-update="onNodeUpdate"
-          @add-node="onAddNode"
-          @remove-node="onRemoveNode"
-        />
-      </div>
-      <div class="bg-white p-4 m-4 shadow-md w-64">
-        <h4>Viewport</h4>
-        <div class="mb-1" v-for="(factSheetName, idx) in Object.keys(visibleFactSheets).sort()" :key="idx">
-          {{factSheetName}}
-        </div>
+    <configuration-modal />
+    <factsheet-dependency-tree-modal />
+    <div class="flex justify-end px-5">
+      <div
+        @click="!!queries ? undefined : fetchViewPortDataset()"
+        :class="!!queries ? 'opacity-50' : 'cursor-pointer'"
+        class="border border-gray-400 rounded text-center px-2 py-1">
+        <font-awesome-icon icon="sync" :spin="!!queries"/>
       </div>
     </div>
-    <div class="flex flex-wrap items-center justify-center absolute top-0 right-0 h-full w-3/4 overflow-auto">
-      <fact-sheet-card
-        v-for="factSheet in dataset"
-        :key="factSheet.id"
-        :fact-sheet="factSheet"
-        v-observe-visibility="{
-          callback: (isVisible, entry) => visibilityChanged(isVisible, entry, factSheet),
-          throttle: 0
-        }"
-        />
+    <div class="overflow-hidden mt-4 flex-1 flex flex-col">
+      <div class="flex-1 overflow-auto flex items-start justify-start">
+        <fact-sheet-card
+          v-for="factSheet in dataset"
+          :key="factSheet.id"
+          :fact-sheet="factSheet"
+          v-observe-visibility="{
+            callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
+            throttle: 0
+          }"
+          />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import NodeSelectBox from './components/NodeSelectBox'
+import { mapMutations, mapGetters, mapActions } from 'vuex'
+import ConfigurationModal from './components/ConfigurationModal'
+import FactsheetDependencyTreeModal from './components/FactsheetDependencyTreeModal'
 import FactSheetCard from './components/FactSheetCard'
-import Performance from './helpers/performance'
 
 export default {
   name: 'app',
-  components: { NodeSelectBox, FactSheetCard },
-  data () {
-    return {
-      tree: [],
-      factSheetTypes: [],
-      performance: undefined,
-      dataset: [],
-      visibleFactSheets: {}
-    }
+  components: { ConfigurationModal, FactsheetDependencyTreeModal, FactSheetCard },
+  computed: {
+    ...mapGetters({
+      reportSetup: 'performance/reportSetup',
+      tree: 'performance/tree',
+      dataset: 'performance/dataset',
+      viewPortDataset: 'performance/viewPortDataset',
+      queries: 'performance/queries'
+    })
   },
   methods: {
-    onNodeUpdate (treeIdx, node) {
-      this.performance.updateNode(treeIdx, node)
-    },
-    onAddNode () {
-      this.performance.pushNode()
-    },
-    onRemoveNode () {
-      this.performance.popNode()
-    },
-    visibilityChanged (isVisible, entry, factSheet) {
-      if (isVisible) {
-        this.$set(this.visibleFactSheets, factSheet.name, true)
-      } else {
-        delete this.visibleFactSheets[factSheet.name]
-      }
-      this.performance.viewPortDataset = this.visibleFactSheets
-      this.performance.debounceFn()
-    }
+    ...mapActions({
+      generateReportConfiguration: 'performance/generateReportConfiguration',
+      factSheetVisibilityEvtHandler: 'performance/factSheetVisibilityEvtHandler',
+      fetchViewPortDataset: 'performance/fetchViewPortDataset'
+    }),
+    ...mapMutations({
+      setReportSetup: 'performance/setReportSetup',
+      setCustomState: 'performance/setCustomState',
+      setDefaultConfiguration: 'performance/setDefaultConfiguration'
+    })
   },
-  created () {
-    this.performance = new Performance()
-
-    this.performance.on('tree', tree => { this.tree = tree })
-
-    this.performance.on('factSheetTypes', factSheetTypes => { this.factSheetTypes = factSheetTypes })
-
-    this.performance.on('fetching-data', viewPortDataset => {
-      const dataset = Object.keys(viewPortDataset)
-      this.$notify({
-        group: 'custom-report',
-        title: 'Fetching data',
-        text: `${dataset[0]} / ${dataset[dataset.length - 1]}`
-      })
-    })
-
-    this.performance.on('dataset', dataset => {
-      this.visibleFactSheets = []
-      this.dataset = dataset
-    })
-
-    this.$lx.init()
-      .then(reportSetup => {
-        this.performance.reportSetup = reportSetup
-        const config = this.performance.generateReportConfiguration()
-        this.tree = this.performance.tree
-        this.$lx.ready(config)
-      })
+  async created () {
+    const reportSetup = await this.$lx.init()
+    console.debug(`Report Setup`, reportSetup)
+    const { config = {}, savedState = {} } = reportSetup
+    const { customState } = savedState || {}
+    this.setDefaultConfiguration(config)
+    if (customState) this.setCustomState(customState)
+    this.setReportSetup(reportSetup)
+    const reportConfiguration = await this.generateReportConfiguration({ vm: this })
+    this.$lx.ready(reportConfiguration)
   }
 }
 </script>
@@ -108,9 +74,12 @@ export default {
 <style lang="stylus">
 
 #app
-  font-family 'Avenir', Helvetica, Arial, sans-serif
+  font-family: "Axiforma", "Helvetica Neue", Helvetica, Arial, sans-serif
+  font-size 12px
   -webkit-font-smoothing antialiased
   -moz-osx-font-smoothing grayscale
-  text-align center
-  color #2c3e50
+  color #333
+  height 100vh
+  display flex
+  flex-flow column
 </style>
