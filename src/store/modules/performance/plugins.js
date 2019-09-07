@@ -29,6 +29,12 @@ const performancePlugin = store => {
       lx.updateConfiguration(config)
     }
   )
+
+  // publish state whenever it changes
+  store.watch(
+    () => store.getters['performance/reportConfigurationState'],
+    reportConfigurationState => lx.publishState(reportConfigurationState)
+  )
 }
 
 export default [performancePlugin]

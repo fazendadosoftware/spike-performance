@@ -16,6 +16,8 @@ export const tree = state => state.tree
 
 export const dataset = state => state.dataset
 
+export const childrenFilter = state => state.childrenFilter
+
 export const enrichedDataset = state => state.enrichedDataset
 
 export const viewPortDataset = state => state.viewPortDataset
@@ -32,3 +34,8 @@ export const hideEmptyClusters = state => state.hideEmptyClusters
 export const fetchCompleteDataset = state => state.fetchCompleteDataset
 
 export const loadingIDs = state => state.loadingIDs
+
+export const reportConfigurationState = state => {
+  const { tree, hideEmptyClusters, fetchCompleteDataset } = state
+  return { tree, hideEmptyClusters, fetchCompleteDataset }
+}

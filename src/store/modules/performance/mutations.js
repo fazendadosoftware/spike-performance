@@ -6,6 +6,7 @@ export const queryStart = state => state.queries++
 export const queryEnd = state => state.queries--
 
 export const setReportSetup = (state, reportSetup) => {
+  const { tree } = state
   const { settings } = reportSetup
   const { dataModel, viewModel, translations, baseUrl } = settings
   state.reportSetup = { ...reportSetup }
@@ -23,7 +24,20 @@ export const setReportSetup = (state, reportSetup) => {
   state.factSheetTypes = factSheetTypes
 
   // Initialize tree
-  pushNodeToTree(state)
+  if (!tree.length) pushNodeToTree(state)
+}
+
+export const setDefaultConfiguration = (state, defaultConfiguration) => {
+  const { fetchCompleteDataset = true, hideEmptyClusters = false } = defaultConfiguration
+  state.fetchCompleteDataset = fetchCompleteDataset
+  state.hideEmptyClusters = hideEmptyClusters
+}
+
+export const setCustomState = (state, customState) => {
+  const { fetchCompleteDataset, hideEmptyClusters, tree } = customState
+  state.fetchCompleteDataset = fetchCompleteDataset
+  state.hideEmptyClusters = hideEmptyClusters
+  state.tree = tree
 }
 
 export const setDataset = (state, dataset) => {
@@ -56,8 +70,17 @@ export const setView = (state, view) => {
   state.view = { key, label, legendItems }
 }
 
-export const setChildrenFilter = (state, filter) => {
-  state.childrenFilter = filter
+export const setChildrenFilter = (state, dataset) => {
+  const childrenFilter = dataset
+    .reduce((accumulator, child) => {
+      accumulator[child.id] = child
+      return accumulator
+    }, {})
+  state.childrenFilter = childrenFilter
+}
+
+export const setTree = (state, tree = []) => {
+  state.tree = tree
 }
 
 // appends a node to the tree

@@ -27,17 +27,16 @@ export const generateReportConfiguration = (store, { vm }) => { /* eslint-disabl
         key: `children-${endPointFactSheetType}`,
         fixedFactSheetType: endPointFactSheetType || '',
         attributes: ['name'],
-        facetFiltersChangedCallback: filter => commit('setChildrenFilter', filter)
+        callback: dataset => commit('setChildrenFilter', dataset)
       }
     ],
-    reportViewFactSheetType: endPointFactSheetType !== startPointFactSheetType ? endPointFactSheetType : undefined,
-    reportViewCallback: endPointFactSheetType !== startPointFactSheetType
+    reportViewFactSheetType: endPointFactSheetType || null,
+    reportViewCallback: !!endPointFactSheetType
       ? view => {
         commit('setView', view)
         dispatch('updateViewForEndpointFactSheets')
       } : undefined
   }
-
   return reportConfiguration
 }
 
@@ -105,7 +104,7 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
     } else {
       const dependencyNode = tree[parentNodeTree.length]
       const { relationType } = dependencyNode
-      const { edges } = { ...(factSheet || node)[relationType] }
+      const { edges = [] } = { ...(factSheet || node)[relationType] }
       factSheet ? delete factSheet[relationType] : delete node[relationType]
       parentNodeTree.unshift(factSheet || node)
       return edges
@@ -144,7 +143,7 @@ export const fetchViewPortDataset = async ({ commit, state, dispatch }) => {
 export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
   const { treeEndpointFactSheetTypes = {}, view = {}, enrichedDataset } = getters
   const { endPointFactSheetType = '' } = treeEndpointFactSheetTypes
-  const { key, legendItems } = view
+  const { key } = view
 
   const childrenFsIds = Object.keys(Object.values(enrichedDataset)
     .map(({ children = {} }) => children)
@@ -176,10 +175,12 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
   }
   commit('queryStart')
   try {
+    let legendItems = []
     const mapping = await lx.executeGraphQL(query, variables)
       .then(({ view = {} }) => {
         const { mapping = [] } = view
-        return mapping.reduce((accumulator, { fsId, legendId }) => {
+        legendItems = view.legendItems
+        return (mapping || []).reduce((accumulator, { fsId, legendId }) => {
           accumulator[fsId] = legendId
           return accumulator
         }, {})
@@ -189,8 +190,8 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
         let { id, children } = fs
         children = Object.values(children).map(child => {
           const { id } = child
-          const legendItem = mapping[id] || -1
-          const view = legendItems[legendItem + 1] || {}
+          const legendItem = mapping[id]
+          const view = legendItems.length > legendItem + 1 ? legendItems[legendItem + 1] : {}
           return { ...child, legendItem, view }
         })
         accumulator[id] = { ...fs, children }
@@ -204,3 +205,45 @@ export const updateViewForEndpointFactSheets = async ({ getters, commit }) => {
     throw err
   }
 }
+
+// pushes node to local tree, doesn't commit any changes to the state
+export const pushNodeToTree = ({ state }, { tree, node }) => {
+  const { factSheetTypes } = state
+  if (!node) {
+    if (!tree.length) {
+      const defaultFactSheetType = Object.values(factSheetTypes)
+        .sort((typeA, typeB) => {
+          const factSheetTypeALabel = typeA.label
+          const factSheetTypeBLabel = typeB.label
+          return factSheetTypeALabel > factSheetTypeBLabel
+            ? 1
+            : factSheetTypeALabel < factSheetTypeBLabel
+              ? -1
+              : 0
+        })
+        .shift()
+      const { factSheetType, relations } = defaultFactSheetType
+      const { relationType, targetFactSheetType } = relations.length ? relations[0] : {}
+      node = { factSheetType, relationType, targetFactSheetType }
+    } else {
+      const lastNode = tree[tree.length - 1]
+      let { factSheetType, relationType } = lastNode
+      const relation = factSheetTypes[factSheetType].relations
+        .find(relation => relation.relationType === relationType)
+      let { targetFactSheetType } = relation
+      targetFactSheetType = factSheetTypes[targetFactSheetType]
+      const { relations } = targetFactSheetType
+      const factSheetTypesInTree = tree.map(node => node.factSheetType)
+      const filteredRelations = relations.filter(({ targetFactSheetType }) => factSheetTypesInTree.indexOf(targetFactSheetType) < 0)
+      const targetRelation = filteredRelations.length ? filteredRelations[0] : {}
+      node = {
+        factSheetType: targetFactSheetType.factSheetType,
+        relationType: targetRelation.relationType,
+        targetFactSheetType: targetRelation.targetFactSheetType
+      }
+    }
+  }
+  tree.push(node)
+  return tree
+}
+

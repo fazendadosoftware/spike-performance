@@ -4,7 +4,8 @@
     name="configuration-modal"
     :adaptive="true"
     :height="'auto'"
-    :resizable="true">
+    :resizable="true"
+    @before-open="beforeOpen">
     <div class="modal-container">
       <div class="modal-header">
         <a href="javascript:;" @click="$modal.hide('configuration-modal')" class="close">x</a>
@@ -13,21 +14,25 @@
       <div class="p-5">
         <div class="flex flex-col items-center">
           <node-select-box
-            v-for="(node, idx) in tree"
+            v-for="(node, idx) in localTree"
             :key="idx"
             :idx="idx"
             :node="node"
+            :tree="localTree"
+            @push-node="pushNode"
+            @pop-node="popNode"
+            @update-node="updateNode"
           />
         </div>
         <div class="mt-6">
           <label class="checkbox">
-            <input type="checkbox" v-model="fetchCompleteDatasetSetting">
+            <input type="checkbox" v-model="localFetchCompleteDatasetSetting">
             Fetch complete dataset
           </label>
         </div>
-        <div class="mt-2" v-if="fetchCompleteDatasetSetting">
+        <div class="mt-2">
           <label class="checkbox">
-            <input type="checkbox" v-model="hideEmptyClustersSetting">
+            <input type="checkbox" v-model="localHideEmptyClustersSetting">
             Hide empty clusters
           </label>
         </div>
@@ -36,11 +41,10 @@
         <button
           @click="$modal.hide('configuration-modal')"
           class="w-20 bg-white hover:bg-gray-100 text-grey-600 border-solid border border-gray-400 font-bold py-2 px-4 rounded shadow focus:outline-none mr-1">
-          Close
+          Cancel
         </button>
         <button
-          v-if="false"
-          @click="$modal.hide('configuration-modal')"
+          @click="applyConfiguration"
           class="w-20 btn-primary font-bold py-2 px-4 rounded shadow focus:outline-none">
           Apply
         </button>
@@ -50,40 +54,66 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import NodeSelectBox from './NodeSelectBox'
 
 export default {
   name: 'ConfigurationModal',
   components: { NodeSelectBox },
+  data: () => ({
+    localTree: [],
+    localHideEmptyClustersSetting: false,
+    localFetchCompleteDatasetSetting: false
+  }),
   computed: {
     ...mapGetters({
       hideEmptyClusters: 'performance/hideEmptyClusters',
       fetchCompleteDataset: 'performance/fetchCompleteDataset',
       tree: 'performance/tree'
-    }),
-    hideEmptyClustersSetting: {
-      get () {
-        return this.hideEmptyClusters
-      },
-      set (val) {
-        this.setHideEmptyClusters(val)
-      }
-    },
-    fetchCompleteDatasetSetting: {
-      get () {
-        return this.fetchCompleteDataset
-      },
-      set (val) {
-        this.setFetchCompleteDataset(val)
-      }
-    }
+    })
   },
   methods: {
+    ...mapActions({
+      pushNodeToTree: 'performance/pushNodeToTree'
+    }),
     ...mapMutations({
       setHideEmptyClusters: 'performance/setHideEmptyClusters',
-      setFetchCompleteDataset: 'performance/setFetchCompleteDataset'
-    })
+      setFetchCompleteDataset: 'performance/setFetchCompleteDataset',
+      setTree: 'performance/setTree'
+    }),
+    beforeOpen (evt) {
+      this.localTree = [ ...this.tree ]
+      this.localHideEmptyClustersSetting = this.hideEmptyClusters
+      this.localFetchCompleteDatasetSetting = this.fetchCompleteDataset
+    },
+    pushNode (node) {
+      this.pushNodeToTree({ tree: this.localTree, node })
+    },
+    popNode () {
+      this.localTree.pop()
+    },
+    updateNode ({ treeIdx, node }) {
+      this.localTree.splice(treeIdx, 1, node)
+    },
+    applyConfiguration () {
+      const originalTree = this.tree.map(({ relationType }) => relationType).join('')
+      const localTree = this.localTree.map(({ relationType }) => relationType).join('')
+      if (localTree !== originalTree) this.setTree(this.localTree)
+      if (this.localFetchCompleteDatasetSetting !== this.fetchCompleteDataset) this.setFetchCompleteDataset(this.localFetchCompleteDatasetSetting)
+      if (this.localHideEmptyClustersSetting !== this.hideEmptyClusters) this.setHideEmptyClusters(this.localHideEmptyClustersSetting)
+      this.$modal.hide('configuration-modal')
+    }
+  },
+  watch: {
+    tree (val) {
+      this.localTree = val
+    },
+    hideEmptyClusters (val) {
+      this.localHideEmptyClustersSetting = val
+    },
+    fetchCompleteDataset (val) {
+      this.localFetchCompleteDatasetSetting = val
+    }
   }
 }
 </script>

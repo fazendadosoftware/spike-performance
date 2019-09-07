@@ -42,7 +42,7 @@ export const mapFactSheetTypes = state => {
         const { field } = relation
         delete relation.field
         delete relation.values
-        return { ...relation, relationType: field, targetFactSheetType: 'ITComponent' }
+        return { ...relation, relationType: field, targetFactSheetType: '' }
       })
     ITComponent.relations = [ ...relations, ...extraRelations ]
   }
