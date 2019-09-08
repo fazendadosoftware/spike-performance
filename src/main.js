@@ -32,4 +32,5 @@ if (process.env.NODE_ENV === 'development') {
   // devtools.connect(/* host, port */)
 }
 
-new Vue({ store, render: h => h(App) }).$mount('#app')
+const app = new Vue({ store, render: h => h(App) }).$mount('#app')
+store.$app = app

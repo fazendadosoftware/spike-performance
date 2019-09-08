@@ -1,4 +1,20 @@
-export const generateReportConfiguration = (store, { vm }) => { /* eslint-disable */
+import domtoimage from '../../../helpers/dom-to-image-more'
+
+// eslint-disable-next-line
+const generateReportImageUrl = el => {
+  return new Promise((resolve, reject) => {
+    const height = el.scrollHeight
+    const width = el.scrollWidth
+    const scale = 2
+    domtoimage.toPng(el, { height, width, scale })
+      .then(dataUrl => {
+        resolve(dataUrl)
+      })
+      .catch(err => reject(err))
+  })
+}
+
+export const generateReportConfiguration = (store, { vm }) => {
   const { commit, state, getters, dispatch } = store
   const { tree } = state
   const { treeEndpointFactSheetTypes } = getters
@@ -9,6 +25,14 @@ export const generateReportConfiguration = (store, { vm }) => { /* eslint-disabl
   const reportConfiguration = {
     allowEditing: false,
     allowTableView: false,
+    export: {
+      beforeExport: async () => {
+        const dataUrl = await generateReportImageUrl(vm.$refs['cards-container'])
+        const img = new Image()
+        img.src = dataUrl
+        return img
+      }
+    },
     menuActions: {
       showConfigure: true,
       configureCallback: () => {
@@ -31,7 +55,7 @@ export const generateReportConfiguration = (store, { vm }) => { /* eslint-disabl
       }
     ],
     reportViewFactSheetType: endPointFactSheetType || null,
-    reportViewCallback: !!endPointFactSheetType
+    reportViewCallback: endPointFactSheetType
       ? view => {
         commit('setView', view)
         dispatch('updateViewForEndpointFactSheets')
@@ -246,4 +270,3 @@ export const pushNodeToTree = ({ state }, { tree, node }) => {
   tree.push(node)
   return tree
 }
-

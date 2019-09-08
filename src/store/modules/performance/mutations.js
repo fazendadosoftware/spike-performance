@@ -145,3 +145,7 @@ export const setFetchCompleteDataset = (state, fetchCompleteDataset) => {
 export const setLoadingIDs = (state, loadingIDs) => {
   state.loadingIDs = loadingIDs
 }
+
+export const setVM = (state, vm) => {
+  state.vm = vm
+}

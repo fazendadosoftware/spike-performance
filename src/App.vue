@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="overflow-hidden mt-4 flex-1 flex flex-col">
-      <div class="flex-1 overflow-auto flex items-start justify-start">
+      <div class="flex-1 overflow-auto flex items-start justify-start cards-container" ref="cards-container">
         <fact-sheet-card
           v-for="factSheet in dataset"
           :key="factSheet.id"

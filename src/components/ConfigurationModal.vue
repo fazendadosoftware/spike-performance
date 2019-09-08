@@ -12,17 +12,19 @@
         <h3>Edit Settings</h3>
       </div>
       <div class="p-5">
-        <div class="flex flex-col items-center">
-          <node-select-box
-            v-for="(node, idx) in localTree"
-            :key="idx"
-            :idx="idx"
-            :node="node"
-            :tree="localTree"
-            @push-node="pushNode"
-            @pop-node="popNode"
-            @update-node="updateNode"
-          />
+        <div class="flex">
+          <div class="flex flex-col flex-1 items-center">
+            <node-select-box
+              v-for="(node, idx) in localTree"
+              :key="idx"
+              :idx="idx"
+              :node="node"
+              :tree="localTree"
+              @push-node="pushNode"
+              @pop-node="popNode"
+              @update-node="updateNode"
+            />
+          </div>
         </div>
         <div class="mt-6">
           <label class="checkbox">

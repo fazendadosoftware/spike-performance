@@ -24,8 +24,9 @@ const performancePlugin = store => {
   store.watch(
     () => store.getters['performance/treeEndpointFactSheetTypes'],
     async () => {
-      const { _vm } = store
-      const config = await store.dispatch('performance/generateReportConfiguration', { vm: _vm })
+      const { $app } = store
+      const vm = $app.$children[0]
+      const config = await store.dispatch('performance/generateReportConfiguration', { vm })
       lx.updateConfiguration(config)
     }
   )
