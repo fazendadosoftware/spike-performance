@@ -14,10 +14,10 @@
     @closed="closed"
     >
     <div class="modal-container">
-      <div class="modal-header">
+      <div class="modal-header relative">
+        <a href="javascript:;" @click="$modal.hide('factsheet-relationship-tree-modal')" class="close absolute top-0 right-0 p-3">x</a>
         <div class="text-2xl font-semibold">Relationship Tree</div>
-        <a href="javascript:;" @click="$modal.hide('factsheet-relationship-tree-modal')" class="close">x</a>
-        <div class="text-lg font-semibold">{{factSheet.name | truncate}}</div>
+        <span class="text-lg p-1 rounded" :style="getFactSheetTypeStyle(factSheet.type)">{{factSheet.name | truncate}}</span>
       </div>
       <div class="p-5">
         <div
@@ -58,7 +58,7 @@ export default {
   }),
   filters: {
     truncate (value) {
-      const maxLen = 26
+      const maxLen = 40
       if (!value) return ''
       return value.length > maxLen ? `${value.substr(0, maxLen)}...` : value
     }

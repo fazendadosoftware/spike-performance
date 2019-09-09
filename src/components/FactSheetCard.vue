@@ -104,7 +104,7 @@ export default {
   },
   filters: {
     truncate (value) {
-      const maxLen = 26
+      const maxLen = 32
       if (!value) return ''
       return value.length > maxLen ? `${value.substr(0, maxLen)}...` : value
     }
