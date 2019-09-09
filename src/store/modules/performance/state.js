@@ -19,5 +19,6 @@ export default {
   minZoom: 10,
   maxZoom: 200,
   zoomStep: 5,
-  currentZoom: 100
+  currentZoom: 100,
+  childFactSheetNameSorting: true
 }

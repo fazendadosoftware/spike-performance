@@ -7,7 +7,7 @@ import vmodal from 'vue-js-modal'
 import store from './store'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPlus, faMinus, faSpinner, faSync } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faMinus, faSpinner, faSync, faSortAlphaUp, faSortAlphaDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueObserveVisibility from 'vue-observe-visibility'
 import '@leanix/reporting'
@@ -15,7 +15,7 @@ import '@leanix/reporting'
 import '@/assets/css/tailwind.css'
 import '@/assets/css/tooltip.css'
 
-[faPlus, faMinus, faSpinner, faSync].forEach(icon => library.add(icon))
+[faPlus, faMinus, faSpinner, faSync, faSortAlphaUp, faSortAlphaDown].forEach(icon => library.add(icon))
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(VueObserveVisibility)

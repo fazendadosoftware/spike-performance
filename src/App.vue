@@ -4,8 +4,8 @@
     <configuration-modal />
     <factsheet-dependency-tree-modal />
     <div class="flex justify-end px-5">
-      <sort-control/>
-      <zoom-control/>
+      <sort-control class="mr-6"/>
+      <zoom-control class="mr-6"/>
       <refresh-control/>
     </div>
     <div class="overflow-hidden mt-4 flex-1 flex flex-col">
@@ -15,7 +15,7 @@
           :style="`${cardsContainerScaledStyle}`"
           ref="cards-container">
           <fact-sheet-card
-            v-for="factSheet in dataset"
+            v-for="factSheet in sortedDataset"
             :key="factSheet.id"
             :fact-sheet="factSheet"
             v-observe-visibility="{
@@ -55,12 +55,18 @@ export default {
       dataset: 'performance/dataset',
       viewPortDataset: 'performance/viewPortDataset',
       isIE: 'performance/isIE',
-      currentZoom: 'performance/currentZoom'
+      currentZoom: 'performance/currentZoom',
+      childFactSheetNameSorting: 'performance/childFactSheetNameSorting'
     }),
     cardsContainerScaledStyle () {
       const transform = `transform-origin: top left; transform: scale(${this.currentZoom / 100}, ${this.currentZoom / 100})`
       const style = `${transform}`
       return style
+    },
+    sortedDataset () {
+      return [...this.dataset]
+        .sort((A, B) => A.name > B.name ? 1 : A.name < B.name ? -1 : 0)
+        // .sort((A, B) => A.name > B.name ? this.childFactSheetNameSorting ? 1 : -1 : A.name < B.name ? this.childFactSheetNameSorting ? -1 : 1 : 0)
     }
   },
   methods: {

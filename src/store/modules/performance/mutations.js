@@ -149,3 +149,7 @@ export const setLoadingIDs = (state, loadingIDs) => {
 export const setCurrentZoom = (state, currentZoom) => {
   state.currentZoom = currentZoom
 }
+
+export const toggleChildFactSheetNameSorting = state => {
+  state.childFactSheetNameSorting = !state.childFactSheetNameSorting
+}

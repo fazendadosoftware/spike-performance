@@ -49,3 +49,5 @@ export const zoomStep = state => state.zoomStep
 export const currentZoom = state => state.currentZoom
 
 export const isIE = state => state.isIE
+
+export const childFactSheetNameSorting = state => state.childFactSheetNameSorting

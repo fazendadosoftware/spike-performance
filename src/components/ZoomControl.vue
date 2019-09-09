@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center mr-6">
+  <div class="flex items-center justify-center">
     <div class="mr-2">Zoom</div>
     <input class="mr-2" type="range" :min="minZoom" :max="maxZoom" :step="zoomStep" v-model="localCurrentZoom" @dblclick="localCurrentZoom = 100">
     <div style="width: 20px">{{localCurrentZoom}}%</div>

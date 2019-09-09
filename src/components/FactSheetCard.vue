@@ -46,7 +46,8 @@ export default {
       childrenFilter: 'performance/childrenFilter',
       loadingIDs: 'performance/loadingIDs',
       hideEmptyClusters: 'performance/hideEmptyClusters',
-      viewModel: 'performance/viewModel'
+      viewModel: 'performance/viewModel',
+      childFactSheetNameSorting: 'performance/childFactSheetNameSorting'
     }),
     childrenCount () {
       return Object.keys(this.children).length
@@ -62,6 +63,7 @@ export default {
           accumulator[id] = child
           return accumulator
         }, {}))
+        .sort((A, B) => A.name > B.name ? this.childFactSheetNameSorting ? 1 : -1 : A.name < B.name ? this.childFactSheetNameSorting ? -1 : 1 : 0)
       return children
     },
     isLoading () {
