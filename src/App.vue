@@ -16,7 +16,7 @@
       <div class="overflow-auto flex-1 flex">
         <div
           class="flex-1 flex items-start justify-start"
-          :style="`margin-top: ${isIE ? '4' : '2'}rem; ${cardsContainerScaledStyle}`"
+          :style="`${cardsContainerScaledStyle}`"
           ref="cards-container">
           <fact-sheet-card
             v-for="factSheet in dataset"
