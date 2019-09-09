@@ -2,7 +2,7 @@
   <div id="app">
     <notifications group="custom-report" />
     <configuration-modal />
-    <factsheet-dependency-tree-modal />
+    <factsheet-relationship-tree-modal />
     <div class="flex justify-end px-5">
       <sort-control class="mr-6"/>
       <zoom-control class="mr-6"/>
@@ -32,7 +32,7 @@
 <script>
 import { mapMutations, mapGetters, mapActions } from 'vuex'
 import ConfigurationModal from './components/ConfigurationModal'
-import FactsheetDependencyTreeModal from './components/FactsheetDependencyTreeModal'
+import FactsheetRelationshipTreeModal from './components/FactsheetRelationshipTreeModal'
 import FactSheetCard from './components/FactSheetCard'
 import ZoomControl from './components/ZoomControl'
 import SortControl from './components/SortControl'
@@ -42,7 +42,7 @@ export default {
   name: 'app',
   components: {
     ConfigurationModal,
-    FactsheetDependencyTreeModal,
+    FactsheetRelationshipTreeModal,
     FactSheetCard,
     ZoomControl,
     SortControl,

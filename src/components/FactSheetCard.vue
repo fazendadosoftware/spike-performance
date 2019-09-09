@@ -118,7 +118,7 @@ export default {
     this.debounceFn = debounce(() => {
       if (this.hoveredChild) {
         const factSheet = this.hoveredChild
-        this.$modal.toggle('factsheet-dependency-tree-modal', { factSheet })
+        this.$modal.toggle('factsheet-relationship-tree-modal', { factSheet })
       }
     }, 0)
   },

@@ -36,7 +36,7 @@ export const generateReportConfiguration = (store, { vm }) => {
     menuActions: {
       showConfigure: true,
       configureCallback: () => {
-        vm.$modal.hide('factsheet-dependency-tree-modal')
+        vm.$modal.hide('factsheet-relationship-tree-modal')
         vm.$modal.toggle('configuration-modal')
       }
     },

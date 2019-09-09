@@ -12,6 +12,7 @@
         <h3>Edit Settings</h3>
       </div>
       <div class="p-5">
+        <relationship-tree />
         <div class="flex">
           <div class="flex flex-col flex-1 items-center">
             <node-select-box
@@ -58,10 +59,11 @@
 <script>
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import NodeSelectBox from './NodeSelectBox'
+import RelationshipTree from './RelationshipTree'
 
 export default {
   name: 'ConfigurationModal',
-  components: { NodeSelectBox },
+  components: { NodeSelectBox, RelationshipTree },
   data: () => ({
     localTree: [],
     localHideEmptyClustersSetting: false,
