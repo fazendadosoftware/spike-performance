@@ -146,6 +146,6 @@ export const setLoadingIDs = (state, loadingIDs) => {
   state.loadingIDs = loadingIDs
 }
 
-export const setVM = (state, vm) => {
-  state.vm = vm
+export const setCurrentZoom = (state, currentZoom) => {
+  state.currentZoom = currentZoom
 }

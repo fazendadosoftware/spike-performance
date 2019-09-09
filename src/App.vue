@@ -4,6 +4,7 @@
     <configuration-modal />
     <factsheet-dependency-tree-modal />
     <div class="flex justify-end px-5">
+      <zoom-control/>
       <div
         @click="!!queries ? undefined : fetchViewPortDataset()"
         :class="!!queries ? 'opacity-50' : 'cursor-pointer'"
@@ -12,16 +13,21 @@
       </div>
     </div>
     <div class="overflow-hidden mt-4 flex-1 flex flex-col">
-      <div class="flex-1 overflow-auto flex items-start justify-start cards-container" ref="cards-container">
-        <fact-sheet-card
-          v-for="factSheet in dataset"
-          :key="factSheet.id"
-          :fact-sheet="factSheet"
-          v-observe-visibility="{
-            callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
-            throttle: 0
-          }"
-          />
+      <div class="overflow-auto flex-1 flex">
+        <div
+          class="flex-1 flex items-start justify-start"
+          :style="`margin-top: ${isIE ? '4' : '2'}rem; ${cardsContainerScaledStyle}`"
+          ref="cards-container">
+          <fact-sheet-card
+            v-for="factSheet in dataset"
+            :key="factSheet.id"
+            :fact-sheet="factSheet"
+            v-observe-visibility="{
+              callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
+              throttle: 0
+            }"
+            />
+        </div>
       </div>
     </div>
   </div>
@@ -32,18 +38,31 @@ import { mapMutations, mapGetters, mapActions } from 'vuex'
 import ConfigurationModal from './components/ConfigurationModal'
 import FactsheetDependencyTreeModal from './components/FactsheetDependencyTreeModal'
 import FactSheetCard from './components/FactSheetCard'
+import ZoomControl from './components/ZoomControl'
 
 export default {
   name: 'app',
-  components: { ConfigurationModal, FactsheetDependencyTreeModal, FactSheetCard },
+  components: {
+    ConfigurationModal,
+    FactsheetDependencyTreeModal,
+    FactSheetCard,
+    ZoomControl
+  },
   computed: {
     ...mapGetters({
       reportSetup: 'performance/reportSetup',
       tree: 'performance/tree',
       dataset: 'performance/dataset',
       viewPortDataset: 'performance/viewPortDataset',
-      queries: 'performance/queries'
-    })
+      queries: 'performance/queries',
+      isIE: 'performance/isIE',
+      currentZoom: 'performance/currentZoom'
+    }),
+    cardsContainerScaledStyle () {
+      const transform = `transform-origin: top left; transform: scale(${this.currentZoom / 100}, ${this.currentZoom / 100})`
+      const style = `${transform}`
+      return style
+    }
   },
   methods: {
     ...mapActions({
