@@ -13,7 +13,7 @@
         class="child-box"
         :style="getChildStyle(child)"
         @click="childMouseOverEvtHandler(child)"
-        @mouseover="childMouseOverEvtHandler(child)"
+        @mouseover="true ? undefined : childMouseOverEvtHandler(child)"
         @mouseleave="childMouseLeaveEvtHandler(child)">
         <span class="child-name">{{child.name | truncate}}</span>
       </div>
@@ -118,7 +118,7 @@ export default {
         const factSheet = this.hoveredChild
         this.$modal.toggle('factsheet-dependency-tree-modal', { factSheet })
       }
-    }, 1000)
+    }, 0)
   },
   beforeDestroy () {
     delete this.debounceFn

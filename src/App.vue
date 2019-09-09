@@ -4,13 +4,9 @@
     <configuration-modal />
     <factsheet-dependency-tree-modal />
     <div class="flex justify-end px-5">
+      <sort-control/>
       <zoom-control/>
-      <div
-        @click="!!queries ? undefined : fetchViewPortDataset()"
-        :class="!!queries ? 'opacity-50' : 'cursor-pointer'"
-        class="border border-gray-400 rounded text-center px-2 py-1">
-        <font-awesome-icon icon="sync" :spin="!!queries"/>
-      </div>
+      <refresh-control/>
     </div>
     <div class="overflow-hidden mt-4 flex-1 flex flex-col">
       <div class="overflow-auto flex-1 flex">
@@ -39,6 +35,8 @@ import ConfigurationModal from './components/ConfigurationModal'
 import FactsheetDependencyTreeModal from './components/FactsheetDependencyTreeModal'
 import FactSheetCard from './components/FactSheetCard'
 import ZoomControl from './components/ZoomControl'
+import SortControl from './components/SortControl'
+import RefreshControl from './components/RefreshControl'
 
 export default {
   name: 'app',
@@ -46,7 +44,9 @@ export default {
     ConfigurationModal,
     FactsheetDependencyTreeModal,
     FactSheetCard,
-    ZoomControl
+    ZoomControl,
+    SortControl,
+    RefreshControl
   },
   computed: {
     ...mapGetters({
@@ -54,7 +54,6 @@ export default {
       tree: 'performance/tree',
       dataset: 'performance/dataset',
       viewPortDataset: 'performance/viewPortDataset',
-      queries: 'performance/queries',
       isIE: 'performance/isIE',
       currentZoom: 'performance/currentZoom'
     }),
@@ -67,8 +66,7 @@ export default {
   methods: {
     ...mapActions({
       generateReportConfiguration: 'performance/generateReportConfiguration',
-      factSheetVisibilityEvtHandler: 'performance/factSheetVisibilityEvtHandler',
-      fetchViewPortDataset: 'performance/fetchViewPortDataset'
+      factSheetVisibilityEvtHandler: 'performance/factSheetVisibilityEvtHandler'
     }),
     ...mapMutations({
       setReportSetup: 'performance/setReportSetup',
