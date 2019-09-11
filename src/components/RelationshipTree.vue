@@ -1,70 +1,16 @@
 <template>
-  <div class="relative">
-    <factsheet-node v-for="node in nodes" :key="node.id" :node="node"/>
+  <div class="flex flex-col bg-red-300 justify-center">
+    <div v-for="node in treeData.nodes" :key="node.id">
+      {{node.label}}
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
-import FactsheetNode from './FactsheetNode'
-import { Network } from 'vis-network'
 
 export default {
   name: 'RelationshipTree',
-  components: { FactsheetNode },
-  data: () => ({
-    factSheet: {},
-    network: undefined,
-    overlayComponents: [],
-    nodes: []
-  }),
-  methods: {
-    getNodeCoords (node) {
-      const { id } = node
-      const pos = this.network.getPositions([id])
-      const coords = this.network.canvasToDOM({ x: pos[id].x, y: pos[id].y })
-      return { ...node, ...coords }
-    },
-    updateNetwork () {
-      const { nodes, edges } = this.treeData
-      if (this.network) this.network.destroy()
-      const options = {
-        autoResize: true,
-        height: `${300}px`,
-        nodes: {
-          shape: 'box',
-          widthConstraint: {
-            minimum: 150,
-            maximum: 150
-          },
-          heightConstraint: {
-            minimum: 40
-          }
-        },
-        edges: {
-          arrows: 'to'
-        },
-        interaction: {
-          dragNodes: false,
-          dragView: false,
-          zoomView: false
-        },
-        layout: {
-          hierarchical: {
-            enabled: true,
-            levelSeparation: 90,
-            direction: 'UD'
-          }
-        },
-        physics: {
-          enabled: false
-        }
-      }
-      this.network = new Network(this.$el, { nodes, edges }, options)
-      this.network.on('afterDrawing', () => { this.nodes = nodes.map(this.getNodeCoords) })
-      this.network.on('beforeDrawing', () => { this.nodes = [] })
-    }
-  },
   computed: {
     ...mapGetters({
       tree: 'performance/tree',
@@ -92,13 +38,6 @@ export default {
       const data = { nodes, edges }
       return data
     }
-  },
-  mounted () {
-    this.updateNetwork()
-  },
-  beforeDestroy () {
-    this.network.off('click')
-    this.network.destroy()
   }
 }
 </script>

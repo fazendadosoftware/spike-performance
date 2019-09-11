@@ -12,9 +12,8 @@
         <h3>Edit Settings</h3>
       </div>
       <div class="p-5">
-        <relationship-tree />
         <div class="flex">
-          <div class="flex flex-col flex-1 items-center">
+          <div v-draw-arrows class="relative flex flex-col flex-1 items-center">
             <node-select-box
               v-for="(node, idx) in localTree"
               :key="idx"
@@ -24,6 +23,7 @@
               @push-node="pushNode"
               @pop-node="popNode"
               @update-node="updateNode"
+              class="z-10"
             />
           </div>
         </div>
@@ -59,11 +59,11 @@
 <script>
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import NodeSelectBox from './NodeSelectBox'
-import RelationshipTree from './RelationshipTree'
+import { screenToSVG } from '../helpers/svg'
 
 export default {
   name: 'ConfigurationModal',
-  components: { NodeSelectBox, RelationshipTree },
+  components: { NodeSelectBox },
   data: () => ({
     localTree: [],
     localHideEmptyClustersSetting: false,
@@ -118,6 +118,67 @@ export default {
     fetchCompleteDataset (val) {
       this.localFetchCompleteDatasetSetting = val
     }
+  },
+  directives: {
+    drawArrows: (() => {
+      const insertSvg = el => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+        svg.setAttribute('class', 'arrow-canvas absolute top-0 left-0 h-full w-full')
+        el.appendChild(svg)
+        return svg
+      }
+      /* eslint-disable-next-line */
+      const removeSvg = el => {
+        const svg = el.getElementsByClassName('arrow-canvas')[0]
+        if (svg) svg.remove()
+      }
+      const updateArrows = el => {
+        console.log('updating')
+        const { width, height } = el.getBoundingClientRect()
+        const svg = el.getElementsByClassName('arrow-canvas')[0]
+        if (!svg) return
+        while (svg.lastChild) svg.removeChild(svg.lastChild)
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
+
+        Array.from(el.getElementsByClassName('select-box'))
+          .map(el => el.getBoundingClientRect())
+          .reduce((accumulator, bbox, idx, bboxes) => {
+            if (idx === 0) return accumulator
+            const previousBbox = bboxes[idx - 1]
+            const center = bbox.left + (bbox.width / 2)
+            accumulator.push({ x1: center, x2: center, y1: previousBbox.bottom, y2: bbox.top })
+            return accumulator
+          }, [])
+          .map(({ x1, x2, y1, y2 }) => {
+            const c1 = screenToSVG(svg, x1, y1)
+            const c2 = screenToSVG(svg, x2, y2)
+            return { x1: c1.x, x2: c2.x, y1: c1.y, y2: c2.y }
+          })
+          .forEach(line => {
+            const shape = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+            Object.entries(line).forEach(([key, value]) => shape.setAttribute(key, value))
+            shape.setAttribute('stroke', '#9e9e9e')
+            shape.setAttribute('stroke-width', 3)
+            svg.appendChild(shape)
+          })
+      }
+
+      return {
+        inserted: el => {
+          // window.addEventListener('resize', updateArrows(el))
+          insertSvg(el)
+          updateArrows(el)
+        },
+        componentUpdated: (el, binding, vnode) => {
+          const { context } = vnode
+          context.$nextTick(() => updateArrows(el))
+        },
+        unbind: el => {
+          [...el.getElementsByClassName('arrow-canvas')].map(n => n && n.remove())
+          // window.removeEventListener('resize', updateArrows(el))
+        }
+      }
+    })()
   }
 }
 </script>
@@ -219,4 +280,5 @@ label.checkbox
   color white
   &:hover
     background darken(#1665ee, 10%)
+
 </style>
