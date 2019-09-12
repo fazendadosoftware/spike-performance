@@ -7,8 +7,9 @@
           :disabled="tree.length > 1"
           class="select-box block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded focus:outline-none"
           :class="editable && tree.length === 1 ? 'cursor-pointer' : 'cursor-default'"
-          :style="getFactSheetTypeStyle(factSheetType)"
-          >
+          :style="getFactSheetTypeStyle(factSheetType, true)"
+          :data-type="factSheetType"
+          :data-stroke="getFactSheetTypeStyle(factSheetType).bgColor">
           <option
             v-for="(option, idx) in factSheetTypeOptions"
             :key="idx"
@@ -23,7 +24,7 @@
           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
             <path
               d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-              :stroke="getFactSheetTypeColor(factSheetType)" :fill="getFactSheetTypeColor(factSheetType)"/>
+              :stroke="getFactSheetTypeStyle(factSheetType).color" :fill="getFactSheetTypeStyle(factSheetType).color"/>
           </svg>
         </div>
       </div>
@@ -35,7 +36,9 @@
           v-model="relation"
           :disabled="!editable"
           class="select-box block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded focus:outline-none"
-          :style="getRelationTypeStyle(relation)"
+          :data-type="getTargetFactSheetType(relation)"
+          :data-stroke="getRelationTypeStyle(relation).bgColor"
+          :style="getRelationTypeStyle(relation, true)"
           :class="editable ? 'cursor-pointer' : 'cursor-default'">
           <option
             v-for="(relation, idx) in relations"
@@ -50,7 +53,7 @@
           <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
             <path
               d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
-              :stroke="getRelationTypeColor(relation)" :fill="getRelationTypeColor(relation)"/>
+              :stroke="getRelationTypeStyle(relation).color" :fill="getRelationTypeStyle(relation).color"/>
           </svg>
         </div>
       </div>
@@ -179,24 +182,19 @@ export default {
       pushNodeToTree: 'performance/pushNodeToTree',
       popNodeFromTree: 'performance/popNodeFromTree'
     }),
-    getFactSheetTypeStyle (factSheetType) {
-      const { bgColor, color } = this.viewModel[factSheetType] || {}
-      return `background: ${bgColor}; color: ${color}`
+    getFactSheetTypeStyle (factSheetType, asString = false) {
+      const { bgColor = '#000', color = '#fff' } = this.viewModel[factSheetType] || {}
+      return asString
+        ? `background:${bgColor};color:${color}`
+        : { bgColor, color }
     },
-    getRelationTypeStyle (relationType) {
+    getTargetFactSheetType (relationType) {
       const relation = this.relations.find(relation => relation.relationType === relationType) || {}
       const { targetFactSheetType } = relation
-      return this.getFactSheetTypeStyle(targetFactSheetType)
+      return targetFactSheetType
     },
-    getFactSheetTypeColor (factSheetType) {
-      const { color } = this.viewModel[factSheetType] || {}
-      console.log(factSheetType, 'COLOR', color, this.viewModel)
-      return color
-    },
-    getRelationTypeColor (relationType) {
-      const relation = this.relations.find(relation => relation.relationType === relationType) || {}
-      const { targetFactSheetType } = relation
-      return this.getFactSheetTypeColor(targetFactSheetType)
+    getRelationTypeStyle (relationType, asString = false) {
+      return this.getFactSheetTypeStyle(this.getTargetFactSheetType(relationType), asString)
     }
   }
 }

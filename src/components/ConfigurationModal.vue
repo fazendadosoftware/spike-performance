@@ -121,26 +121,34 @@ export default {
   },
   directives: {
     drawArrows: (() => {
-      const insertSvg = el => {
+      const insertSvg = (el, ctx) => {
+        const { $store } = ctx
+        const { getters } = $store
+        const viewModel = getters['performance/viewModel'] || {}
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
         svg.setAttribute('class', 'arrow-canvas absolute top-0 left-0 h-full w-full')
         const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
-        const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker')
-        marker.setAttribute('id', 'arrow')
-        marker.setAttribute('viewBox', '0 0 10 10')
-        marker.setAttribute('refX', '0')
-        marker.setAttribute('refY', '5')
-        marker.setAttribute('markerUnits', 'strokeWidth')
-        marker.setAttribute('markerWidth', '5')
-        marker.setAttribute('markerHeight', '5')
-        marker.setAttribute('orient', 'auto-start-reverse')
-        marker.setAttribute('stroke', '#9e9e9e')
-        marker.setAttribute('stroke-width', 1)
-        marker.setAttribute('fill', '#9e9e9e')
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-        path.setAttribute('d', 'M 0 0 L 5 5 L 0 10 z')
-        marker.appendChild(path)
-        defs.appendChild(marker)
+        const types = Object.keys(viewModel)
+
+        types.forEach(type => {
+          const { bgColor = '#000' } = viewModel[type] || {}
+          const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker')
+          marker.setAttribute('id', `arrow-${type}`)
+          marker.setAttribute('viewBox', '0 0 10 10')
+          marker.setAttribute('refX', '0')
+          marker.setAttribute('refY', '5')
+          marker.setAttribute('markerUnits', 'strokeWidth')
+          marker.setAttribute('markerWidth', '5')
+          marker.setAttribute('markerHeight', '5')
+          marker.setAttribute('orient', 'auto')
+          marker.setAttribute('stroke', bgColor)
+          marker.setAttribute('stroke-width', 1)
+          marker.setAttribute('fill', bgColor)
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+          path.setAttribute('d', 'M 0 0 L 5 5 L 0 10 z')
+          marker.appendChild(path)
+          defs.appendChild(marker)
+        })
         svg.appendChild(defs)
         el.appendChild(svg)
         return svg
@@ -159,25 +167,36 @@ export default {
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
 
         Array.from(el.getElementsByClassName('select-box'))
-          .map(el => el.getBoundingClientRect())
+          .map(el => {
+            const { left, width, bottom, top } = el.getBoundingClientRect()
+            const stroke = el.getAttribute('data-stroke')
+            const type = el.getAttribute('data-type')
+            return { left, width, bottom, top, stroke, type }
+          })
           .reduce((accumulator, bbox, idx, bboxes) => {
             if (idx === 0) return accumulator
             const previousBbox = bboxes[idx - 1]
             const center = bbox.left + (bbox.width / 2)
-            accumulator.push({ x1: center, x2: center, y1: previousBbox.bottom, y2: bbox.top })
+            accumulator.push({
+              x1: center,
+              x2: center,
+              y1: previousBbox.bottom,
+              y2: bbox.top,
+              stroke: previousBbox.stroke,
+              type: previousBbox.type
+            })
             return accumulator
           }, [])
-          .map(({ x1, x2, y1, y2 }) => {
+          .map(({ x1, x2, y1, y2, stroke, type }) => {
             const c1 = screenToSVG(svg, x1, y1)
             const c2 = screenToSVG(svg, x2, y2)
-            return { x1: c1.x, x2: c2.x, y1: c1.y, y2: c2.y - 9 }
+            return { x1: c1.x, x2: c2.x, y1: c1.y, y2: c2.y - 9, stroke, type }
           })
           .forEach(line => {
             const shape = document.createElementNS('http://www.w3.org/2000/svg', 'line')
             Object.entries(line).forEach(([key, value]) => shape.setAttribute(key, value))
-            shape.setAttribute('stroke', '#9e9e9e')
             shape.setAttribute('stroke-width', 3)
-            shape.setAttribute('marker-end', 'url(#arrow)')
+            shape.setAttribute('marker-end', `url(#arrow-${line.type})`)
             svg.appendChild(shape)
           })
       }
@@ -186,7 +205,7 @@ export default {
         inserted: (el, binding, vnode) => {
           const { context } = vnode
           // window.addEventListener('resize', updateArrows(el))
-          insertSvg(el)
+          insertSvg(el, context)
           context.$nextTick(() => updateArrows(el))
         },
         componentUpdated: (el, binding, vnode) => {
