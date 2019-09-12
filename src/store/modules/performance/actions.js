@@ -1,17 +1,12 @@
 import domtoimage from '../../../helpers/dom-to-image-more'
 
 // eslint-disable-next-line
-const generateReportImageUrl = el => {
-  return new Promise((resolve, reject) => {
-    const height = el.scrollHeight
-    const width = el.scrollWidth
-    const scale = 2
-    domtoimage.toPng(el, { height, width, scale })
-      .then(dataUrl => {
-        resolve(dataUrl)
-      })
-      .catch(err => reject(err))
-  })
+const generateReportImageUrl = async el => {
+  const height = el.scrollHeight
+  const width = el.scrollWidth
+  const scale = 2
+  const dataUrl = await domtoimage.toPng(el, { height, width, scale })
+  return dataUrl
 }
 
 export const generateReportConfiguration = (store, { vm }) => {
@@ -30,6 +25,18 @@ export const generateReportConfiguration = (store, { vm }) => {
         const dataUrl = await generateReportImageUrl(vm.$refs['cards-container'])
         const img = new Image()
         img.src = dataUrl
+
+        /*
+        const link = document.createElement('a')
+        link.style.display = 'none'
+        const attrs = { href: dataUrl, filename: 'report.png', target: '_blank' }
+        Object.entries(attrs).forEach(([key, value]) => link.setAttribute(key, value))
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        link.remove()
+        */
+
         return img
       }
     },

@@ -117,6 +117,10 @@ export default {
           },
           heightConstraint: {
             minimum: 40
+          },
+          font: {
+            size: 12,
+            face: 'helvetica'
           }
         },
         edges: {
