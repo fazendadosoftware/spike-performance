@@ -124,6 +124,24 @@ export default {
       const insertSvg = el => {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
         svg.setAttribute('class', 'arrow-canvas absolute top-0 left-0 h-full w-full')
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+        const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker')
+        marker.setAttribute('id', 'arrow')
+        marker.setAttribute('viewBox', '0 0 10 10')
+        marker.setAttribute('refX', '0')
+        marker.setAttribute('refY', '5')
+        marker.setAttribute('markerUnits', 'strokeWidth')
+        marker.setAttribute('markerWidth', '5')
+        marker.setAttribute('markerHeight', '5')
+        marker.setAttribute('orient', 'auto-start-reverse')
+        marker.setAttribute('stroke', '#9e9e9e')
+        marker.setAttribute('stroke-width', 1)
+        marker.setAttribute('fill', '#9e9e9e')
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        path.setAttribute('d', 'M 0 0 L 5 5 L 0 10 z')
+        marker.appendChild(path)
+        defs.appendChild(marker)
+        svg.appendChild(defs)
         el.appendChild(svg)
         return svg
       }
@@ -133,11 +151,11 @@ export default {
         if (svg) svg.remove()
       }
       const updateArrows = el => {
-        console.log('updating')
         const { width, height } = el.getBoundingClientRect()
         const svg = el.getElementsByClassName('arrow-canvas')[0]
         if (!svg) return
-        while (svg.lastChild) svg.removeChild(svg.lastChild)
+        // delete existing lines
+        Array.from(svg.getElementsByTagName('line')).forEach(line => line.remove())
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
 
         Array.from(el.getElementsByClassName('select-box'))
@@ -152,22 +170,24 @@ export default {
           .map(({ x1, x2, y1, y2 }) => {
             const c1 = screenToSVG(svg, x1, y1)
             const c2 = screenToSVG(svg, x2, y2)
-            return { x1: c1.x, x2: c2.x, y1: c1.y, y2: c2.y }
+            return { x1: c1.x, x2: c2.x, y1: c1.y, y2: c2.y - 9 }
           })
           .forEach(line => {
             const shape = document.createElementNS('http://www.w3.org/2000/svg', 'line')
             Object.entries(line).forEach(([key, value]) => shape.setAttribute(key, value))
             shape.setAttribute('stroke', '#9e9e9e')
             shape.setAttribute('stroke-width', 3)
+            shape.setAttribute('marker-end', 'url(#arrow)')
             svg.appendChild(shape)
           })
       }
 
       return {
-        inserted: el => {
+        inserted: (el, binding, vnode) => {
+          const { context } = vnode
           // window.addEventListener('resize', updateArrows(el))
           insertSvg(el)
-          updateArrows(el)
+          context.$nextTick(() => updateArrows(el))
         },
         componentUpdated: (el, binding, vnode) => {
           const { context } = vnode

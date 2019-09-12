@@ -163,12 +163,12 @@ export default {
     display flex
     align-items center
     justify-content center
-    text-align center
-    word-break break-word
     position relative
     overflow hidden
     transition background ease 0.3s
     background white
+    word-break break-word
+    text-align center
 
   .child-name
     cursor pointer

@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div class="flex items-center mb-5">
+    <div class="flex items-center mb-6">
       <div class="block relative w-64">
         <select
-          :id="`select-box-top-${idx}`"
           v-model="factSheetType"
           :disabled="tree.length > 1"
-          class="select-box block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none"
+          class="select-box block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded focus:outline-none"
           :class="editable && tree.length === 1 ? 'cursor-pointer' : 'cursor-default'"
+          :style="getFactSheetTypeStyle(factSheetType)"
           >
           <option
             v-for="(option, idx) in factSheetTypeOptions"
@@ -17,8 +17,14 @@
             {{option.label}}
           </option>
         </select>
-        <div v-if="(tree.length < 1)" class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+        <div
+          v-if="tree.length === 1"
+          class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path
+              d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+              :stroke="getFactSheetTypeColor(factSheetType)" :fill="getFactSheetTypeColor(factSheetType)"/>
+          </svg>
         </div>
       </div>
       <div class="flex ml-2 w-24"/>
@@ -26,12 +32,11 @@
     <div class="flex items-center" v-if="isLastInTree">
       <div class="block relative w-64">
         <select
-          :id="`select-box-bottom-${idx}`"
           v-model="relation"
           :disabled="!editable"
-          class="select-box block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none"
-          :class="editable ? 'cursor-pointer' : 'cursor-default'"
-          >
+          class="select-box block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded focus:outline-none"
+          :style="getRelationTypeStyle(relation)"
+          :class="editable ? 'cursor-pointer' : 'cursor-default'">
           <option
             v-for="(relation, idx) in relations"
             :key="idx"
@@ -39,8 +44,14 @@
             {{relation.label}}
           </option>
         </select>
-        <div v-if="editable" class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+        <div
+          v-if="editable"
+          class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
+          <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path
+              d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+              :stroke="getRelationTypeColor(relation)" :fill="getRelationTypeColor(relation)"/>
+          </svg>
         </div>
       </div>
       <div class="flex ml-2 w-24" v-if="isLastInTree">
@@ -48,14 +59,14 @@
           v-if="!isFirstInTree"
           @click="$emit('pop-node')"
           @click2="popNodeFromTree()"
-          class="outline-none shadow-md cursor-pointer bg-red-500 hover:bg-red-700 border border-red-700 text-white font-semi-bold rounded m-1 p-1 w-12">
+          class="outline-none cursor-pointer bg-red-500 hover:bg-red-700 border border-red-700 text-white font-semi-bold rounded m-1 p-1 w-12">
           <font-awesome-icon icon="minus" />
         </button>
         <button
           v-if="!isStub"
           @click="$emit('push-node')"
           @click2="pushNodeToTree()"
-          class="outline-none shadow-md cursor-pointer bg-green-500 hover:bg-green-700 border border-green-700 text-white font-semi-bold rounded m-1 p-1 w-12">
+          class="outline-none cursor-pointer bg-green-500 hover:bg-green-700 border border-green-700 text-white font-semi-bold rounded m-1 p-1 w-12">
           <font-awesome-icon icon="plus" />
         </button>
       </div>
@@ -84,7 +95,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      factSheetTypes: 'performance/factSheetTypes'
+      factSheetTypes: 'performance/factSheetTypes',
+      viewModel: 'performance/viewModel'
     }),
     factSheetType: {
       get () {
@@ -166,7 +178,26 @@ export default {
     ...mapMutations({
       pushNodeToTree: 'performance/pushNodeToTree',
       popNodeFromTree: 'performance/popNodeFromTree'
-    })
+    }),
+    getFactSheetTypeStyle (factSheetType) {
+      const { bgColor, color } = this.viewModel[factSheetType] || {}
+      return `background: ${bgColor}; color: ${color}`
+    },
+    getRelationTypeStyle (relationType) {
+      const relation = this.relations.find(relation => relation.relationType === relationType) || {}
+      const { targetFactSheetType } = relation
+      return this.getFactSheetTypeStyle(targetFactSheetType)
+    },
+    getFactSheetTypeColor (factSheetType) {
+      const { color } = this.viewModel[factSheetType] || {}
+      console.log(factSheetType, 'COLOR', color, this.viewModel)
+      return color
+    },
+    getRelationTypeColor (relationType) {
+      const relation = this.relations.find(relation => relation.relationType === relationType) || {}
+      const { targetFactSheetType } = relation
+      return this.getFactSheetTypeColor(targetFactSheetType)
+    }
   }
 }
 </script>
