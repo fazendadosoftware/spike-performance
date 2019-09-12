@@ -39,3 +39,15 @@ export const reportConfigurationState = state => {
   const { tree, hideEmptyClusters, fetchCompleteDataset } = state
   return { tree, hideEmptyClusters, fetchCompleteDataset }
 }
+
+export const minZoom = state => state.minZoom
+
+export const maxZoom = state => state.maxZoom
+
+export const zoomStep = state => state.zoomStep
+
+export const currentZoom = state => state.currentZoom
+
+export const isIE = state => state.isIE
+
+export const childFactSheetNameSorting = state => state.childFactSheetNameSorting

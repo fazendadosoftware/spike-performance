@@ -13,7 +13,7 @@
       </div>
       <div class="p-5">
         <div class="flex">
-          <div class="flex flex-col flex-1 items-center">
+          <div v-draw-arrows class="relative flex flex-col flex-1 items-center">
             <node-select-box
               v-for="(node, idx) in localTree"
               :key="idx"
@@ -23,6 +23,7 @@
               @push-node="pushNode"
               @pop-node="popNode"
               @update-node="updateNode"
+              class="z-10"
             />
           </div>
         </div>
@@ -58,6 +59,7 @@
 <script>
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import NodeSelectBox from './NodeSelectBox'
+import { screenToSVG } from '../helpers/svg'
 
 export default {
   name: 'ConfigurationModal',
@@ -116,6 +118,87 @@ export default {
     fetchCompleteDataset (val) {
       this.localFetchCompleteDatasetSetting = val
     }
+  },
+  directives: {
+    drawArrows: (() => {
+      const insertSvg = el => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+        svg.setAttribute('class', 'arrow-canvas absolute top-0 left-0 h-full w-full')
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs')
+        const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker')
+        marker.setAttribute('id', 'arrow')
+        marker.setAttribute('viewBox', '0 0 10 10')
+        marker.setAttribute('refX', '0')
+        marker.setAttribute('refY', '5')
+        marker.setAttribute('markerUnits', 'strokeWidth')
+        marker.setAttribute('markerWidth', '5')
+        marker.setAttribute('markerHeight', '5')
+        marker.setAttribute('orient', 'auto-start-reverse')
+        marker.setAttribute('stroke', '#9e9e9e')
+        marker.setAttribute('stroke-width', 1)
+        marker.setAttribute('fill', '#9e9e9e')
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+        path.setAttribute('d', 'M 0 0 L 5 5 L 0 10 z')
+        marker.appendChild(path)
+        defs.appendChild(marker)
+        svg.appendChild(defs)
+        el.appendChild(svg)
+        return svg
+      }
+      /* eslint-disable-next-line */
+      const removeSvg = el => {
+        const svg = el.getElementsByClassName('arrow-canvas')[0]
+        if (svg) svg.remove()
+      }
+      const updateArrows = el => {
+        const { width, height } = el.getBoundingClientRect()
+        const svg = el.getElementsByClassName('arrow-canvas')[0]
+        if (!svg) return
+        // delete existing lines
+        Array.from(svg.getElementsByTagName('line')).forEach(line => line.remove())
+        svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
+
+        Array.from(el.getElementsByClassName('select-box'))
+          .map(el => el.getBoundingClientRect())
+          .reduce((accumulator, bbox, idx, bboxes) => {
+            if (idx === 0) return accumulator
+            const previousBbox = bboxes[idx - 1]
+            const center = bbox.left + (bbox.width / 2)
+            accumulator.push({ x1: center, x2: center, y1: previousBbox.bottom, y2: bbox.top })
+            return accumulator
+          }, [])
+          .map(({ x1, x2, y1, y2 }) => {
+            const c1 = screenToSVG(svg, x1, y1)
+            const c2 = screenToSVG(svg, x2, y2)
+            return { x1: c1.x, x2: c2.x, y1: c1.y, y2: c2.y - 9 }
+          })
+          .forEach(line => {
+            const shape = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+            Object.entries(line).forEach(([key, value]) => shape.setAttribute(key, value))
+            shape.setAttribute('stroke', '#9e9e9e')
+            shape.setAttribute('stroke-width', 3)
+            shape.setAttribute('marker-end', 'url(#arrow)')
+            svg.appendChild(shape)
+          })
+      }
+
+      return {
+        inserted: (el, binding, vnode) => {
+          const { context } = vnode
+          // window.addEventListener('resize', updateArrows(el))
+          insertSvg(el)
+          context.$nextTick(() => updateArrows(el))
+        },
+        componentUpdated: (el, binding, vnode) => {
+          const { context } = vnode
+          context.$nextTick(() => updateArrows(el))
+        },
+        unbind: el => {
+          [...el.getElementsByClassName('arrow-canvas')].map(n => n && n.remove())
+          // window.removeEventListener('resize', updateArrows(el))
+        }
+      }
+    })()
   }
 }
 </script>
@@ -217,4 +300,5 @@ label.checkbox
   color white
   &:hover
     background darken(#1665ee, 10%)
+
 </style>

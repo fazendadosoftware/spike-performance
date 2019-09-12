@@ -1,7 +1,7 @@
 <template>
   <modal
     class="modal"
-    name="factsheet-dependency-tree-modal"
+    name="factsheet-relationship-tree-modal"
     :adaptive="true"
     :height="'auto'"
     :width="'400px'"
@@ -14,9 +14,10 @@
     @closed="closed"
     >
     <div class="modal-container">
-      <div class="modal-header">
-        <a href="javascript:;" @click="$modal.hide('factsheet-dependency-tree-modal')" class="close">x</a>
-        <h3>Relationship Tree</h3>
+      <div class="modal-header relative">
+        <a href="javascript:;" @click="$modal.hide('factsheet-relationship-tree-modal')" class="close absolute top-0 right-0 p-3">x</a>
+        <div class="text-2xl font-semibold">Relationship Tree</div>
+        <span class="text-lg p-1 rounded" :style="getFactSheetTypeStyle(factSheet.type)">{{factSheet.name | truncate}}</span>
       </div>
       <div class="p-5">
         <div
@@ -36,7 +37,7 @@
       </div>
       <div class="modal-footer">
         <button
-          @click="$modal.hide('factsheet-dependency-tree-modal')"
+          @click="$modal.hide('factsheet-relationship-tree-modal')"
           class="w-20 bg-white hover:bg-gray-100 text-grey-600 border-solid border border-gray-400 font-bold py-2 px-4 rounded shadow focus:outline-none mr-1">
           Close
         </button>
@@ -50,11 +51,18 @@ import { mapGetters } from 'vuex'
 import { Network } from 'vis-network'
 
 export default {
-  name: 'FactsheetDependencyTreeModal',
+  name: 'FactsheetRelationshipTreeModal',
   data: () => ({
     factSheet: {},
     network: undefined
   }),
+  filters: {
+    truncate (value) {
+      const maxLen = 40
+      if (!value) return ''
+      return value.length > maxLen ? `${value.substr(0, maxLen)}...` : value
+    }
+  },
   methods: {
     handleChildClickEvt (evt) {
       const { nodes = [] } = evt
@@ -182,7 +190,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-.v--modal-overlay[data-modal="factsheet-dependency-tree-modal"]
+.v--modal-overlay[data-modal="factsheet-relationship-tree-modal"]
   background rgba(0, 0, 0, 0.5)
 
 .modal-container

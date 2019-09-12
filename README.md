@@ -34,6 +34,20 @@ yarn run test:unit
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
-default configuration
-fetchCompleteDataset <Bool> true
-hideEmptyClusters <Bool> false
+## Report Configuration
+This report can be configured according the specifications defined by its config object. Find below an example for the report standard configuration.
+
+```json
+{
+  "fetchCompleteDataset": true,
+  "hideEmptyClusters": true
+}
+```
+
+Properties
+----------
+
+| Name                        | Type           | Required | Default value                    | Info                                        |
+| --------------------------- | -------------- | -------- | -------------------------------- | ------------------------------------------- |
+| **fetchCompleteDataset**    | Boolean | No       | true | Fetches the complete dataset from workspace or partially, only for the startpoint factsheets in view (useful for large workspaces)  |
+| **hideEmptyClusters**    | Boolean | No       | false | Hide clusters without any endpoint factsheets  |

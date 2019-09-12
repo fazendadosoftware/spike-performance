@@ -2,26 +2,28 @@
   <div id="app">
     <notifications group="custom-report" />
     <configuration-modal />
-    <factsheet-dependency-tree-modal />
+    <factsheet-relationship-tree-modal />
     <div class="flex justify-end px-5">
-      <div
-        @click="!!queries ? undefined : fetchViewPortDataset()"
-        :class="!!queries ? 'opacity-50' : 'cursor-pointer'"
-        class="border border-gray-400 rounded text-center px-2 py-1">
-        <font-awesome-icon icon="sync" :spin="!!queries"/>
-      </div>
+      <sort-control class="mr-6"/>
+      <zoom-control class="mr-6"/>
+      <refresh-control/>
     </div>
     <div class="overflow-hidden mt-4 flex-1 flex flex-col">
-      <div class="flex-1 overflow-auto flex items-start justify-start cards-container" ref="cards-container">
-        <fact-sheet-card
-          v-for="factSheet in dataset"
-          :key="factSheet.id"
-          :fact-sheet="factSheet"
-          v-observe-visibility="{
-            callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
-            throttle: 0
-          }"
-          />
+      <div class="overflow-auto flex-1 flex">
+        <div
+          class="flex-1 flex items-start justify-start"
+          :style="`${cardsContainerScaledStyle}`"
+          ref="cards-container">
+          <fact-sheet-card
+            v-for="factSheet in sortedDataset"
+            :key="factSheet.id"
+            :fact-sheet="factSheet"
+            v-observe-visibility="{
+              callback: (isVisible, entry) => factSheetVisibilityEvtHandler({ isVisible, entry, factSheet }),
+              throttle: 0
+            }"
+            />
+        </div>
       </div>
     </div>
   </div>
@@ -30,26 +32,47 @@
 <script>
 import { mapMutations, mapGetters, mapActions } from 'vuex'
 import ConfigurationModal from './components/ConfigurationModal'
-import FactsheetDependencyTreeModal from './components/FactsheetDependencyTreeModal'
+import FactsheetRelationshipTreeModal from './components/FactsheetRelationshipTreeModal'
 import FactSheetCard from './components/FactSheetCard'
+import ZoomControl from './components/ZoomControl'
+import SortControl from './components/SortControl'
+import RefreshControl from './components/RefreshControl'
 
 export default {
   name: 'app',
-  components: { ConfigurationModal, FactsheetDependencyTreeModal, FactSheetCard },
+  components: {
+    ConfigurationModal,
+    FactsheetRelationshipTreeModal,
+    FactSheetCard,
+    ZoomControl,
+    SortControl,
+    RefreshControl
+  },
   computed: {
     ...mapGetters({
       reportSetup: 'performance/reportSetup',
       tree: 'performance/tree',
       dataset: 'performance/dataset',
       viewPortDataset: 'performance/viewPortDataset',
-      queries: 'performance/queries'
-    })
+      isIE: 'performance/isIE',
+      currentZoom: 'performance/currentZoom',
+      childFactSheetNameSorting: 'performance/childFactSheetNameSorting'
+    }),
+    cardsContainerScaledStyle () {
+      const transform = `transform-origin: top left; transform: scale(${this.currentZoom / 100}, ${this.currentZoom / 100})`
+      const style = `${transform}`
+      return style
+    },
+    sortedDataset () {
+      return [...this.dataset]
+        .sort((A, B) => A.name > B.name ? 1 : A.name < B.name ? -1 : 0)
+        // .sort((A, B) => A.name > B.name ? this.childFactSheetNameSorting ? 1 : -1 : A.name < B.name ? this.childFactSheetNameSorting ? -1 : 1 : 0)
+    }
   },
   methods: {
     ...mapActions({
       generateReportConfiguration: 'performance/generateReportConfiguration',
-      factSheetVisibilityEvtHandler: 'performance/factSheetVisibilityEvtHandler',
-      fetchViewPortDataset: 'performance/fetchViewPortDataset'
+      factSheetVisibilityEvtHandler: 'performance/factSheetVisibilityEvtHandler'
     }),
     ...mapMutations({
       setReportSetup: 'performance/setReportSetup',

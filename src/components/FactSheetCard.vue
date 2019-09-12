@@ -13,7 +13,7 @@
         class="child-box"
         :style="getChildStyle(child)"
         @click="childMouseOverEvtHandler(child)"
-        @mouseover="childMouseOverEvtHandler(child)"
+        @mouseover="true ? undefined : childMouseOverEvtHandler(child)"
         @mouseleave="childMouseLeaveEvtHandler(child)">
         <span class="child-name">{{child.name | truncate}}</span>
       </div>
@@ -46,7 +46,8 @@ export default {
       childrenFilter: 'performance/childrenFilter',
       loadingIDs: 'performance/loadingIDs',
       hideEmptyClusters: 'performance/hideEmptyClusters',
-      viewModel: 'performance/viewModel'
+      viewModel: 'performance/viewModel',
+      childFactSheetNameSorting: 'performance/childFactSheetNameSorting'
     }),
     childrenCount () {
       return Object.keys(this.children).length
@@ -62,6 +63,7 @@ export default {
           accumulator[id] = child
           return accumulator
         }, {}))
+        .sort((A, B) => A.name > B.name ? this.childFactSheetNameSorting ? 1 : -1 : A.name < B.name ? this.childFactSheetNameSorting ? -1 : 1 : 0)
       return children
     },
     isLoading () {
@@ -102,7 +104,7 @@ export default {
   },
   filters: {
     truncate (value) {
-      const maxLen = 26
+      const maxLen = 32
       if (!value) return ''
       return value.length > maxLen ? `${value.substr(0, maxLen)}...` : value
     }
@@ -116,9 +118,9 @@ export default {
     this.debounceFn = debounce(() => {
       if (this.hoveredChild) {
         const factSheet = this.hoveredChild
-        this.$modal.toggle('factsheet-dependency-tree-modal', { factSheet })
+        this.$modal.toggle('factsheet-relationship-tree-modal', { factSheet })
       }
-    }, 1000)
+    }, 0)
   },
   beforeDestroy () {
     delete this.debounceFn
@@ -161,12 +163,12 @@ export default {
     display flex
     align-items center
     justify-content center
-    text-align center
-    word-break break-word
     position relative
     overflow hidden
     transition background ease 0.3s
     background white
+    word-break break-word
+    text-align center
 
   .child-name
     cursor pointer
