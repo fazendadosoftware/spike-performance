@@ -25,18 +25,6 @@ export const generateReportConfiguration = (store, { vm }) => {
         const dataUrl = await generateReportImageUrl(vm.$refs['cards-container'])
         const img = new Image()
         img.src = dataUrl
-
-        /*
-        const link = document.createElement('a')
-        link.style.display = 'none'
-        const attrs = { href: dataUrl, filename: 'report.png', target: '_blank' }
-        Object.entries(attrs).forEach(([key, value]) => link.setAttribute(key, value))
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        link.remove()
-        */
-
         return img
       }
     },
