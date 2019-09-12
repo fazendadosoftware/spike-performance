@@ -49,5 +49,5 @@ Properties
 
 | Name                        | Type           | Required | Default value                    | Info                                        |
 | --------------------------- | -------------- | -------- | -------------------------------- | ------------------------------------------- |
-| **fetchCompleteDataset**    | Boolean | No       | true | Fetches the complete dataset from workspace or partially, only for the startpoint factsheets in view (usefull for large workspaces)  |
+| **fetchCompleteDataset**    | Boolean | No       | true | Fetches the complete dataset from workspace or partially, only for the startpoint factsheets in view (useful for large workspaces)  |
 | **hideEmptyClusters**    | Boolean | No       | false | Hide clusters without any endpoint factsheets  |
