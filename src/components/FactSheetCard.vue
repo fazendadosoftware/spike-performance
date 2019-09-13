@@ -102,7 +102,7 @@ export default {
     border-radius 4px
     margin-right 0.75rem
     margin-top 1rem
-    min-width 300px
+    width 300px
     min-height 100px
 
   .card-header
@@ -128,7 +128,7 @@ export default {
     box-sizing border-box
     height 60px
     display flex
-    align-items center
+    align-items flex-start
     justify-content center
     position relative
     overflow hidden

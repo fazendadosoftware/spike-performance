@@ -56,7 +56,8 @@ export default {
   data: () => ({
     factSheet: {},
     network: undefined,
-    children: []
+    children: [],
+    nodes: []
   }),
   filters: {
     truncate (value) {
@@ -86,7 +87,7 @@ export default {
     },
     opened (evt) {
       const { id, name, type } = this.factSheet
-      let nodes = { [id]: { id, name, type } }
+      let nodes = { [id]: { id, name, type, value: 3 } }
       let edges = []
       if (this.children.length) {
         const network = this.children
@@ -159,16 +160,21 @@ export default {
           font: {
             size: 12,
             face: 'helvetica'
+          },
+          scaling: {
+            label: {
+              enabled: true
+            }
           }
         },
         edges: {
           arrows: {
             to: {
-              enabled: true,
-              type: 'triangle'
-            },
-            arrowStrikethrough: true
-          }
+              enabled: true
+              // type: 'triangle'
+            }
+          },
+          arrowStrikethrough: true
         },
         interaction: {
           dragNodes: true,
@@ -186,6 +192,8 @@ export default {
           enabled: true
         }
       }
+      this.nodes = nodes
+      console.log('NODES', this.nodes)
       this.network = new Network(containerEl, data, options)
       this.network.on('click', this.handleChildClickEvt)
     },
@@ -199,6 +207,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      factSheetTypes: 'performance/factSheetTypes',
       viewModel: 'performance/viewModel',
       baseUrl: 'performance/baseUrl'
     }),
@@ -226,12 +235,12 @@ export default {
         })
     },
     legendFactSheetTypes () {
-      return this.parentNodeTree
-        .filter(({ type }, idx, tree) => {
-          const typesTree = tree.slice(0, idx).map(({ type }) => type)
-          const typeAlreadyIncluded = typesTree.indexOf(type) > -1
-          return !type || !typeAlreadyIncluded
-        })
+      const types = Object.values(this.nodes
+        .reduce((accumulator, { type }) => ({
+          ...accumulator,
+          [type]: { type, label: this.$lx.translateFactSheetType(type) }
+        }), {}))
+      return types
     }
   }
 }

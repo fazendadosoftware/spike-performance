@@ -39,6 +39,7 @@
             Hide empty clusters
           </label>
         </div>
+                            <pre>{{localTree}}</pre>
       </div>
       <div class="modal-footer">
         <button
