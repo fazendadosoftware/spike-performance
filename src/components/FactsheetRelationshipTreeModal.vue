@@ -119,7 +119,7 @@ export default {
           }, {}))
           .reduce((accumulator, [ from, targets ]) => {
             const edges = Object.entries(targets)
-              .map(([to, width]) => ({ from, to, width, label: `${width > 1 ? width : ''}` }))
+              .map(([to, width]) => ({ from, to, width }))
             return [...accumulator, ...edges]
           }, [])
       } else {
@@ -154,11 +154,7 @@ export default {
         nodes: {
           shape: 'box',
           widthConstraint: {
-            // minimum: 150,
             maximum: 150
-          },
-          heightConstraint: {
-            // minimum: 40
           },
           font: {
             size: 12,
