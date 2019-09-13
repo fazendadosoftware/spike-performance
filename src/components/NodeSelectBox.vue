@@ -13,7 +13,7 @@
           <option
             v-for="(option, idx) in factSheetTypeOptions"
             :key="idx"
-            :value="option.factSheetType || option.targetFactSheetType"
+            :value="option.targetFactSheetType || option.factSheetType"
             >
             {{option.label}}
           </option>
