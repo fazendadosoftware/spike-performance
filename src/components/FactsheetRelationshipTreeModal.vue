@@ -5,7 +5,7 @@
     :adaptive="true"
     :height="'auto'"
     :resizable="true"
-    :draggable="true"
+    :draggable="false"
     :scrollable="true"
     :reset="true"
     @before-open="beforeOpen"
@@ -68,10 +68,9 @@ export default {
   methods: {
     handleChildClickEvt (evt) {
       const { nodes = [] } = evt
-      const childId = nodes.shift()
-      const child = this.parentNodeTree.find(node => node.id === childId)
-      if (!child) return
-      const { id, type } = child
+      if (!nodes.length) return
+      const { options = {} } = this.network.body.nodes[nodes[0]] || {}
+      const { id, type } = options
       const link = `${this.baseUrl}/factsheet/${type}/${id}`
       this.$lx.openLink(link)
     },
@@ -109,7 +108,20 @@ export default {
             const font = { color }
             return { id, type, name, label, color: bgColor, font }
           })
-        edges = network.edges
+        // compute the weights for each edge
+        edges = Object.entries(network.edges
+          .reduce((accumulator, edge) => {
+            const { from, to } = edge
+            if (!accumulator[from]) accumulator[from] = {}
+            if (!accumulator[from][to]) accumulator[from][to] = 0
+            accumulator[from][to]++
+            return accumulator
+          }, {}))
+          .reduce((accumulator, [ from, targets ]) => {
+            const edges = Object.entries(targets)
+              .map(([to, width]) => ({ from, to, width, label: `${width > 1 ? width : ''}` }))
+            return [...accumulator, ...edges]
+          }, [])
       } else {
         nodes = this.parentNodeTree
           .map(({ id, type, name }, idx) => {
@@ -142,11 +154,11 @@ export default {
         nodes: {
           shape: 'box',
           widthConstraint: {
-            minimum: 150,
+            // minimum: 150,
             maximum: 150
           },
           heightConstraint: {
-            minimum: 40
+            // minimum: 40
           },
           font: {
             size: 12,
@@ -154,22 +166,28 @@ export default {
           }
         },
         edges: {
-          arrows: 'to'
+          arrows: {
+            to: {
+              enabled: true,
+              type: 'triangle'
+            },
+            arrowStrikethrough: true
+          }
         },
         interaction: {
-          dragNodes: false,
-          dragView: false,
-          zoomView: false
+          dragNodes: true,
+          dragView: true,
+          zoomView: true
         },
         layout: {
           hierarchical: {
-            enabled: true,
-            levelSeparation: 90,
-            direction: 'UD'
+            enabled: false
+            // levelSeparation: 150,
+            // direction: 'UD'
           }
         },
         physics: {
-          enabled: false
+          enabled: true
         }
       }
       this.network = new Network(containerEl, data, options)
