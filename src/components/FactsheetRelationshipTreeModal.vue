@@ -4,7 +4,6 @@
     name="factsheet-relationship-tree-modal"
     :adaptive="true"
     :height="'auto'"
-    :width="'400px'"
     :resizable="true"
     :draggable="true"
     :scrollable="true"
@@ -16,7 +15,9 @@
     <div class="modal-container">
       <div class="modal-header relative">
         <a href="javascript:;" @click="$modal.hide('factsheet-relationship-tree-modal')" class="close absolute top-0 right-0 p-3">x</a>
-        <div class="text-2xl font-semibold">Relationship Tree</div>
+        <div class="text-2xl font-semibold">
+          Relationship Tree
+        </div>
         <span class="text-lg p-1 rounded" :style="getFactSheetTypeStyle(factSheet.type)">{{factSheet.name | truncate}}</span>
       </div>
       <div class="p-5">
@@ -54,7 +55,8 @@ export default {
   name: 'FactsheetRelationshipTreeModal',
   data: () => ({
     factSheet: {},
-    network: undefined
+    network: undefined,
+    children: []
   }),
   filters: {
     truncate (value) {
@@ -79,29 +81,57 @@ export default {
     },
     beforeOpen (evt) {
       const { params = {} } = evt
-      const { factSheet = {} } = params
+      const { factSheet = {}, children = [] } = params
       this.factSheet = factSheet
+      this.children = children
     },
     opened (evt) {
-      const nodes = this.parentNodeTree
-        .map(({ id, type, name }, idx) => {
-          const label = name.length > 60 ? name.substring(0, 60) + '...' : name
-          const fsTypeViewModel = this.viewModel[type] || {}
-          const { color, bgColor } = fsTypeViewModel
-          const font = { color }
-          return { id, type, name, label, color: bgColor, font }
-        })
-      const edges = this.parentNodeTree
-        .map((node, idx, tree) => {
-          const isLastNode = idx === (tree.length - 1)
-          if (!isLastNode) {
-            const nextNode = tree[idx + 1]
-            const from = node.id
-            const to = nextNode.id
-            return { from, to }
-          }
-        })
-        .filter(link => !!link)
+      const { id, name, type } = this.factSheet
+      let nodes = { [id]: { id, name, type } }
+      let edges = []
+      if (this.children.length) {
+        const network = this.children
+          .reduce((accumulator, child) => {
+            const { parentNodeTree = [] } = child
+            nodes[child.id] = { id: child.id, name: child.name, type: child.type }
+            parentNodeTree.forEach((parent, idx, tree) => {
+              nodes[parent.id] = { id: parent.id, name: parent.name, type: parent.type }
+              edges.push({ from: parent.id, to: idx === 0 ? child.id : tree[idx - 1].id })
+            })
+            return { nodes, edges }
+          }, { nodes, edges })
+        nodes = Object.values(network.nodes)
+          .map(node => {
+            const { id, type, name } = node
+            const label = name.length > 60 ? name.substring(0, 60) + '...' : name
+            const fsTypeViewModel = this.viewModel[type] || {}
+            const { color, bgColor } = fsTypeViewModel
+            const font = { color }
+            return { id, type, name, label, color: bgColor, font }
+          })
+        edges = network.edges
+      } else {
+        nodes = this.parentNodeTree
+          .map(({ id, type, name }, idx) => {
+            const label = name.length > 60 ? name.substring(0, 60) + '...' : name
+            const fsTypeViewModel = this.viewModel[type] || {}
+            const { color, bgColor } = fsTypeViewModel
+            const font = { color }
+            return { id, type, name, label, color: bgColor, font }
+          })
+        edges = this.parentNodeTree
+          .map((node, idx, tree) => {
+            const isLastNode = idx === (tree.length - 1)
+            if (!isLastNode) {
+              const nextNode = tree[idx + 1]
+              const from = node.id
+              const to = nextNode.id
+              return { from, to }
+            }
+          })
+          .filter(link => !!link)
+      }
+
       const containerEl = this.$refs['chart-container']
       const { offsetHeight } = containerEl
       const data = { nodes, edges }
