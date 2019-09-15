@@ -42,7 +42,7 @@
         <div class="mt-2">
           <label class="checkbox">
             <input type="checkbox" v-model="localWrapLayout">
-            Wrap Layout (experimental) {{localWrapLayout}}
+            Wrap Layout (experimental)
           </label>
         </div>
       </div>
