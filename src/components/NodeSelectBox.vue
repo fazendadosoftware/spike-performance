@@ -115,7 +115,6 @@ export default {
             return labelA > labelB ? 1 : labelA < labelB ? -1 : 0
           })[0]
         this.$emit('update-node', { treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
-        // this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
       }
     },
     relation: {
@@ -127,7 +126,6 @@ export default {
         const { targetFactSheetType } = this.relations.find(relation => relation.relationType === relationType)
         const { factSheetType } = this
         this.$emit('update-node', { treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
-        // this.updateNode({ treeIdx: this.idx, node: { factSheetType, relationType, targetFactSheetType } })
       }
     },
     relations () {
@@ -149,9 +147,10 @@ export default {
             return labelA > labelB ? 1 : labelA < labelB ? -1 : 0
           })
       } else {
-        const parentFactSheetType = this.factSheetTypes[this.tree[this.idx - 1].factSheetType]
+        const previousNode = this.tree[this.idx - 1]
+        const parentFactSheetType = this.factSheetTypes[previousNode.factSheetType]
         const { relations } = parentFactSheetType
-        options = relations
+        options = relations.filter(({ relationType }) => relationType === previousNode.relationType)
       }
       return options
     },
