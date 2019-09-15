@@ -17,6 +17,11 @@ import '@/assets/css/tooltip.css'
 
 [faPlus, faMinus, faSpinner, faSync, faSortAlphaUp, faSortAlphaDown].forEach(icon => library.add(icon))
 
+// If IE, load polyfills
+if (navigator && navigator.userAgent ? navigator.userAgent.indexOf('Trident') > -1 : false) {
+  require('intersection-observer')
+}
+
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.use(VueObserveVisibility)
 Vue.use(Notifications)

@@ -4,9 +4,8 @@
     name="factsheet-relationship-tree-modal"
     :adaptive="true"
     :height="'auto'"
-    :width="'400px'"
     :resizable="true"
-    :draggable="true"
+    :draggable="false"
     :scrollable="true"
     :reset="true"
     @before-open="beforeOpen"
@@ -16,7 +15,9 @@
     <div class="modal-container">
       <div class="modal-header relative">
         <a href="javascript:;" @click="$modal.hide('factsheet-relationship-tree-modal')" class="close absolute top-0 right-0 p-3">x</a>
-        <div class="text-2xl font-semibold">Relationship Tree</div>
+        <div class="text-2xl font-semibold">
+          Relationship Tree
+        </div>
         <span class="text-lg p-1 rounded" :style="getFactSheetTypeStyle(factSheet.type)">{{factSheet.name | truncate}}</span>
       </div>
       <div class="p-5">
@@ -54,7 +55,9 @@ export default {
   name: 'FactsheetRelationshipTreeModal',
   data: () => ({
     factSheet: {},
-    network: undefined
+    network: undefined,
+    children: [],
+    nodes: []
   }),
   filters: {
     truncate (value) {
@@ -66,10 +69,9 @@ export default {
   methods: {
     handleChildClickEvt (evt) {
       const { nodes = [] } = evt
-      const childId = nodes.shift()
-      const child = this.parentNodeTree.find(node => node.id === childId)
-      if (!child) return
-      const { id, type } = child
+      if (!nodes.length) return
+      const { options = {} } = this.network.body.nodes[nodes[0]] || {}
+      const { id, type } = options
       const link = `${this.baseUrl}/factsheet/${type}/${id}`
       this.$lx.openLink(link)
     },
@@ -79,29 +81,70 @@ export default {
     },
     beforeOpen (evt) {
       const { params = {} } = evt
-      const { factSheet = {} } = params
+      const { factSheet = {}, children = [] } = params
       this.factSheet = factSheet
+      this.children = children
     },
     opened (evt) {
-      const nodes = this.parentNodeTree
-        .map(({ id, type, name }, idx) => {
-          const label = name.length > 60 ? name.substring(0, 60) + '...' : name
-          const fsTypeViewModel = this.viewModel[type] || {}
-          const { color, bgColor } = fsTypeViewModel
-          const font = { color }
-          return { id, type, name, label, color: bgColor, font }
-        })
-      const edges = this.parentNodeTree
-        .map((node, idx, tree) => {
-          const isLastNode = idx === (tree.length - 1)
-          if (!isLastNode) {
-            const nextNode = tree[idx + 1]
-            const from = node.id
-            const to = nextNode.id
-            return { from, to }
-          }
-        })
-        .filter(link => !!link)
+      const { id, name, type } = this.factSheet
+      let nodes = { [id]: { id, name, type, value: 3 } }
+      let edges = []
+      if (this.children.length) {
+        const network = this.children
+          .reduce((accumulator, child) => {
+            const { parentNodeTree = [] } = child
+            nodes[child.id] = { id: child.id, name: child.name, type: child.type }
+            parentNodeTree.forEach((parent, idx, tree) => {
+              nodes[parent.id] = { id: parent.id, name: parent.name, type: parent.type }
+              edges.push({ from: parent.id, to: idx === 0 ? child.id : tree[idx - 1].id })
+            })
+            return { nodes, edges }
+          }, { nodes, edges })
+        nodes = Object.values(network.nodes)
+          .map(node => {
+            const { id, type, name } = node
+            const label = name.length > 60 ? name.substring(0, 60) + '...' : name
+            const fsTypeViewModel = this.viewModel[type] || {}
+            const { color, bgColor } = fsTypeViewModel
+            const font = { color }
+            return { id, type, name, label, color: bgColor, font }
+          })
+        // compute the weights for each edge
+        edges = Object.entries(network.edges
+          .reduce((accumulator, edge) => {
+            const { from, to } = edge
+            if (!accumulator[from]) accumulator[from] = {}
+            if (!accumulator[from][to]) accumulator[from][to] = 0
+            accumulator[from][to]++
+            return accumulator
+          }, {}))
+          .reduce((accumulator, [ from, targets ]) => {
+            const edges = Object.entries(targets)
+              .map(([to, width]) => ({ from, to, width }))
+            return [...accumulator, ...edges]
+          }, [])
+      } else {
+        nodes = this.parentNodeTree
+          .map(({ id, type, name }, idx) => {
+            const label = name.length > 60 ? name.substring(0, 60) + '...' : name
+            const fsTypeViewModel = this.viewModel[type] || {}
+            const { color, bgColor } = fsTypeViewModel
+            const font = { color }
+            return { id, type, name, label, color: bgColor, font }
+          })
+        edges = this.parentNodeTree
+          .map((node, idx, tree) => {
+            const isLastNode = idx === (tree.length - 1)
+            if (!isLastNode) {
+              const nextNode = tree[idx + 1]
+              const from = node.id
+              const to = nextNode.id
+              return { from, to }
+            }
+          })
+          .filter(link => !!link)
+      }
+
       const containerEl = this.$refs['chart-container']
       const { offsetHeight } = containerEl
       const data = { nodes, edges }
@@ -112,36 +155,44 @@ export default {
         nodes: {
           shape: 'box',
           widthConstraint: {
-            minimum: 150,
             maximum: 150
-          },
-          heightConstraint: {
-            minimum: 40
           },
           font: {
             size: 12,
             face: 'helvetica'
+          },
+          scaling: {
+            label: {
+              enabled: true
+            }
           }
         },
         edges: {
-          arrows: 'to'
+          arrows: {
+            to: {
+              enabled: true
+              // type: 'triangle'
+            }
+          },
+          arrowStrikethrough: true
         },
         interaction: {
-          dragNodes: false,
-          dragView: false,
-          zoomView: false
+          dragNodes: true,
+          dragView: true,
+          zoomView: true
         },
         layout: {
           hierarchical: {
-            enabled: true,
-            levelSeparation: 90,
-            direction: 'UD'
+            enabled: false
+            // levelSeparation: 150,
+            // direction: 'UD'
           }
         },
         physics: {
-          enabled: false
+          enabled: true
         }
       }
+      this.nodes = nodes
       this.network = new Network(containerEl, data, options)
       this.network.on('click', this.handleChildClickEvt)
     },
@@ -155,6 +206,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      factSheetTypes: 'performance/factSheetTypes',
       viewModel: 'performance/viewModel',
       baseUrl: 'performance/baseUrl'
     }),
@@ -182,12 +234,12 @@ export default {
         })
     },
     legendFactSheetTypes () {
-      return this.parentNodeTree
-        .filter(({ type }, idx, tree) => {
-          const typesTree = tree.slice(0, idx).map(({ type }) => type)
-          const typeAlreadyIncluded = typesTree.indexOf(type) > -1
-          return !type || !typeAlreadyIncluded
-        })
+      const types = Object.values(this.nodes
+        .reduce((accumulator, { type }) => ({
+          ...accumulator,
+          [type]: { type, label: this.$lx.translateFactSheetType(type) }
+        }), {}))
+      return types
     }
   }
 }

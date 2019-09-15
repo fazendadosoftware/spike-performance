@@ -15,6 +15,7 @@ export default {
   childrenFilter: {},
   hideEmptyClusters: false,
   fetchCompleteDataset: true,
+  wrapLayout: false,
   loadingIDs: [],
   minZoom: 10,
   maxZoom: 200,

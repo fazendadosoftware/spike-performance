@@ -19,7 +19,7 @@ export const mapFactSheetTypes = state => {
             ? from.factSheetType
             : to.factSheetType
           const { label } = translations.relations[relationType] || {}
-          return { relationType, label, targetFactSheetType }
+          return { factSheetType, relationType, label, targetFactSheetType }
         })
         // Sort relations alphabetically by target FactSheetType
         .sort((a, b) => {

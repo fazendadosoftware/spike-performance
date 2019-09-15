@@ -1,6 +1,9 @@
 <template>
-  <div v-if="!hideEmptyClusters || hideEmptyClusters && childrenCount" class="card-container">
-    <div class="card-header relative" :style="headerStyle" @click="factSheetClickEvtHandler(factSheet)">
+  <div
+    v-if="!hideEmptyClusters || hideEmptyClusters && childrenCount"
+      class="card-container"
+      :style="isIE ? '' : 'width: 300px'">
+    <div class="card-header relative" :style="headerStyle" @click="factSheetClickEvtHandler(factSheet, children)">
       {{factSheet.name}}
       <transition name="fade">
         <font-awesome-icon v-if="isLoading" icon="spinner" pulse class="absolute top-auto right-0 mr-2"/>
@@ -12,9 +15,7 @@
         :key="child.id"
         class="child-box"
         :style="getChildStyle(child)"
-        @click="childMouseOverEvtHandler(child)"
-        @mouseover="true ? undefined : childMouseOverEvtHandler(child)"
-        @mouseleave="childMouseLeaveEvtHandler(child)">
+        @click="factSheetClickEvtHandler(child)">
         <span class="child-name">{{child.name | truncate}}</span>
       </div>
     </div>
@@ -23,7 +24,6 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import { debounce } from '../store/modules/performance/helpers'
 
 export default {
   name: 'FactSheetCard',
@@ -31,11 +31,6 @@ export default {
     factSheet: {
       type: Object,
       required: true
-    }
-  },
-  data () {
-    return {
-      hoveredChild: ''
     }
   },
   computed: {
@@ -47,7 +42,8 @@ export default {
       loadingIDs: 'performance/loadingIDs',
       hideEmptyClusters: 'performance/hideEmptyClusters',
       viewModel: 'performance/viewModel',
-      childFactSheetNameSorting: 'performance/childFactSheetNameSorting'
+      childFactSheetNameSorting: 'performance/childFactSheetNameSorting',
+      isIE: 'performance/isIE'
     }),
     childrenCount () {
       return Object.keys(this.children).length
@@ -89,17 +85,8 @@ export default {
       const border = `border: 2px solid ${factSheetViewModel.bgColor || '#fff'}`
       return `background: ${bgColor}; color: ${color}; opacity: ${transparency || 1}; ${border}`
     },
-    factSheetClickEvtHandler (factSheet) {
-      const { id, type } = factSheet
-      const link = `${this.baseUrl}/factsheet/${type}/${id}`
-      this.$lx.openLink(link)
-    },
-    childMouseOverEvtHandler (factSheet) {
-      this.hoveredChild = factSheet
-    },
-    childMouseLeaveEvtHandler (factSheet) {
-      const { id } = factSheet
-      if (this.hoveredChild && this.hoveredChild.id === id) this.hoveredChild = undefined
+    factSheetClickEvtHandler (factSheet, children) {
+      this.$modal.toggle('factsheet-relationship-tree-modal', { factSheet, children })
     }
   },
   filters: {
@@ -108,22 +95,6 @@ export default {
       if (!value) return ''
       return value.length > maxLen ? `${value.substr(0, maxLen)}...` : value
     }
-  },
-  watch: {
-    hoveredChild (factSheet) {
-      this.debounceFn()
-    }
-  },
-  created () {
-    this.debounceFn = debounce(() => {
-      if (this.hoveredChild) {
-        const factSheet = this.hoveredChild
-        this.$modal.toggle('factsheet-relationship-tree-modal', { factSheet })
-      }
-    }, 0)
-  },
-  beforeDestroy () {
-    delete this.debounceFn
   }
 }
 </script>
@@ -136,6 +107,7 @@ export default {
     margin-right 0.75rem
     margin-top 1rem
     min-width 300px
+    max-width 300px
     min-height 100px
 
   .card-header
@@ -161,7 +133,7 @@ export default {
     box-sizing border-box
     height 60px
     display flex
-    align-items center
+    align-items flex-start
     justify-content center
     position relative
     overflow hidden

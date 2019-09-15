@@ -4,7 +4,7 @@
     name="configuration-modal"
     :adaptive="true"
     :height="'auto'"
-    :resizable="true"
+    :scrollable="true"
     @before-open="beforeOpen">
     <div class="modal-container">
       <div class="modal-header">
@@ -37,6 +37,12 @@
           <label class="checkbox">
             <input type="checkbox" v-model="localHideEmptyClustersSetting">
             Hide empty clusters
+          </label>
+        </div>
+        <div class="mt-2">
+          <label class="checkbox">
+            <input type="checkbox" v-model="localWrapLayout">
+            Wrap Layout (experimental)
           </label>
         </div>
       </div>
@@ -73,8 +79,17 @@ export default {
     ...mapGetters({
       hideEmptyClusters: 'performance/hideEmptyClusters',
       fetchCompleteDataset: 'performance/fetchCompleteDataset',
-      tree: 'performance/tree'
-    })
+      tree: 'performance/tree',
+      wrapLayout: 'performance/wrapLayout'
+    }),
+    localWrapLayout: {
+      get () {
+        return this.wrapLayout
+      },
+      set (val) {
+        this.setWrapLayout(val)
+      }
+    }
   },
   methods: {
     ...mapActions({
@@ -83,7 +98,8 @@ export default {
     ...mapMutations({
       setHideEmptyClusters: 'performance/setHideEmptyClusters',
       setFetchCompleteDataset: 'performance/setFetchCompleteDataset',
-      setTree: 'performance/setTree'
+      setTree: 'performance/setTree',
+      setWrapLayout: 'performance/setWrapLayout'
     }),
     beforeOpen (evt) {
       this.localTree = [ ...this.tree ]
@@ -156,14 +172,14 @@ export default {
       /* eslint-disable-next-line */
       const removeSvg = el => {
         const svg = el.getElementsByClassName('arrow-canvas')[0]
-        if (svg) svg.remove()
+        if (svg) svg.parentNode.removeChild(svg)
       }
       const updateArrows = el => {
         const { width, height } = el.getBoundingClientRect()
         const svg = el.getElementsByClassName('arrow-canvas')[0]
         if (!svg) return
         // delete existing lines
-        Array.from(svg.getElementsByTagName('line')).forEach(line => line.remove())
+        Array.from(svg.getElementsByTagName('line')).forEach(line => line.parentNode.removeChild(line))
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
 
         Array.from(el.getElementsByClassName('select-box'))
@@ -213,7 +229,7 @@ export default {
           context.$nextTick(() => updateArrows(el))
         },
         unbind: el => {
-          [...el.getElementsByClassName('arrow-canvas')].map(n => n && n.remove())
+          [...el.getElementsByClassName('arrow-canvas')].map(n => n && n.parentNode.removeChild(n))
           // window.removeEventListener('resize', updateArrows(el))
         }
       }
