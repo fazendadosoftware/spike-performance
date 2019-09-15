@@ -4,7 +4,7 @@
     name="configuration-modal"
     :adaptive="true"
     :height="'auto'"
-    :resizable="true"
+    :scrollable="true"
     @before-open="beforeOpen">
     <div class="modal-container">
       <div class="modal-header">
@@ -39,7 +39,6 @@
             Hide empty clusters
           </label>
         </div>
-                            <pre>{{localTree}}</pre>
       </div>
       <div class="modal-footer">
         <button
