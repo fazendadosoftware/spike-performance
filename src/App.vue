@@ -68,7 +68,6 @@ export default {
     sortedDataset () {
       return [...this.dataset]
         .sort((A, B) => A.name > B.name ? 1 : A.name < B.name ? -1 : 0)
-        // .sort((A, B) => A.name > B.name ? this.childFactSheetNameSorting ? 1 : -1 : A.name < B.name ? this.childFactSheetNameSorting ? -1 : 1 : 0)
     }
   },
   methods: {
