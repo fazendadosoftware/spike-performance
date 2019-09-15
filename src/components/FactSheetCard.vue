@@ -1,5 +1,8 @@
 <template>
-  <div v-if="!hideEmptyClusters || hideEmptyClusters && childrenCount" class="card-container">
+  <div
+    v-if="!hideEmptyClusters || hideEmptyClusters && childrenCount"
+      class="card-container"
+      :style="isIE ? '' : 'width: 300px'">
     <div class="card-header relative" :style="headerStyle" @click="factSheetClickEvtHandler(factSheet, children)">
       {{factSheet.name}}
       <transition name="fade">
@@ -39,7 +42,8 @@ export default {
       loadingIDs: 'performance/loadingIDs',
       hideEmptyClusters: 'performance/hideEmptyClusters',
       viewModel: 'performance/viewModel',
-      childFactSheetNameSorting: 'performance/childFactSheetNameSorting'
+      childFactSheetNameSorting: 'performance/childFactSheetNameSorting',
+      isIE: 'performance/isIE'
     }),
     childrenCount () {
       return Object.keys(this.children).length
@@ -102,7 +106,8 @@ export default {
     border-radius 4px
     margin-right 0.75rem
     margin-top 1rem
-    width 300px
+    min-width 300px
+    max-width 300px
     min-height 100px
 
   .card-header

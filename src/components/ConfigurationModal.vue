@@ -172,14 +172,14 @@ export default {
       /* eslint-disable-next-line */
       const removeSvg = el => {
         const svg = el.getElementsByClassName('arrow-canvas')[0]
-        if (svg) svg.remove()
+        if (svg) svg.parentNode.removeChild(svg)
       }
       const updateArrows = el => {
         const { width, height } = el.getBoundingClientRect()
         const svg = el.getElementsByClassName('arrow-canvas')[0]
         if (!svg) return
         // delete existing lines
-        Array.from(svg.getElementsByTagName('line')).forEach(line => line.remove())
+        Array.from(svg.getElementsByTagName('line')).forEach(line => line.parentNode.removeChild(line))
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
 
         Array.from(el.getElementsByClassName('select-box'))
@@ -229,7 +229,7 @@ export default {
           context.$nextTick(() => updateArrows(el))
         },
         unbind: el => {
-          [...el.getElementsByClassName('arrow-canvas')].map(n => n && n.remove())
+          [...el.getElementsByClassName('arrow-canvas')].map(n => n && n.parentNode.removeChild(n))
           // window.removeEventListener('resize', updateArrows(el))
         }
       }
