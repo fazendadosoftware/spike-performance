@@ -193,7 +193,6 @@ export default {
         }
       }
       this.nodes = nodes
-      console.log('NODES', this.nodes)
       this.network = new Network(containerEl, data, options)
       this.network.on('click', this.handleChildClickEvt)
     },
