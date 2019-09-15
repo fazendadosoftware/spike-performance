@@ -11,7 +11,8 @@
     <div class="overflow-hidden mt-4 flex-1 flex flex-col">
       <div class="overflow-auto flex-1 flex">
         <div
-          class="flex-1 flex items-start justify-start"
+          class="flex-1 flex"
+          :class="wrapLayout ? 'flex-wrap items-start justify-center' : 'items-start justify-start'"
           :style="`${cardsContainerScaledStyle}`"
           ref="cards-container">
           <fact-sheet-card
@@ -56,7 +57,8 @@ export default {
       viewPortDataset: 'performance/viewPortDataset',
       isIE: 'performance/isIE',
       currentZoom: 'performance/currentZoom',
-      childFactSheetNameSorting: 'performance/childFactSheetNameSorting'
+      childFactSheetNameSorting: 'performance/childFactSheetNameSorting',
+      wrapLayout: 'performance/wrapLayout'
     }),
     cardsContainerScaledStyle () {
       const transform = `transform-origin: top left; transform: scale(${this.currentZoom / 100}, ${this.currentZoom / 100})`

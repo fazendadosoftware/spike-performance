@@ -39,6 +39,12 @@
             Hide empty clusters
           </label>
         </div>
+        <div class="mt-2">
+          <label class="checkbox">
+            <input type="checkbox" v-model="localWrapLayout">
+            Wrap Layout (experimental) {{localWrapLayout}}
+          </label>
+        </div>
       </div>
       <div class="modal-footer">
         <button
@@ -73,8 +79,17 @@ export default {
     ...mapGetters({
       hideEmptyClusters: 'performance/hideEmptyClusters',
       fetchCompleteDataset: 'performance/fetchCompleteDataset',
-      tree: 'performance/tree'
-    })
+      tree: 'performance/tree',
+      wrapLayout: 'performance/wrapLayout'
+    }),
+    localWrapLayout: {
+      get () {
+        return this.wrapLayout
+      },
+      set (val) {
+        this.setWrapLayout(val)
+      }
+    }
   },
   methods: {
     ...mapActions({
@@ -83,7 +98,8 @@ export default {
     ...mapMutations({
       setHideEmptyClusters: 'performance/setHideEmptyClusters',
       setFetchCompleteDataset: 'performance/setFetchCompleteDataset',
-      setTree: 'performance/setTree'
+      setTree: 'performance/setTree',
+      setWrapLayout: 'performance/setWrapLayout'
     }),
     beforeOpen (evt) {
       this.localTree = [ ...this.tree ]

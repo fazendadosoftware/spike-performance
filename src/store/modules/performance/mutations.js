@@ -142,6 +142,10 @@ export const setFetchCompleteDataset = (state, fetchCompleteDataset) => {
   state.fetchCompleteDataset = fetchCompleteDataset
 }
 
+export const setWrapLayout = (state, wrapLayout) => {
+  state.wrapLayout = wrapLayout
+}
+
 export const setLoadingIDs = (state, loadingIDs) => {
   state.loadingIDs = loadingIDs
 }

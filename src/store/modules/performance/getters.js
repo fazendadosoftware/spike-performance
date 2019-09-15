@@ -33,6 +33,8 @@ export const hideEmptyClusters = state => state.hideEmptyClusters
 
 export const fetchCompleteDataset = state => state.fetchCompleteDataset
 
+export const wrapLayout = state => state.wrapLayout
+
 export const loadingIDs = state => state.loadingIDs
 
 export const reportConfigurationState = state => {
