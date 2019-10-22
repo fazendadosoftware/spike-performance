@@ -9,9 +9,9 @@
       <refresh-control/>
     </div>
     <div class="overflow-hidden mt-4 flex-1 flex flex-col">
-      <div class="overflow-auto flex-1 flex">
+      <div class="overflow-auto flex" :class="wrapLayout ? '' : 'flex-1'">
         <div
-          class="flex-1 flex"
+          class="cards-container flex-1 flex"
           :class="wrapLayout ? 'flex-wrap items-start justify-center' : 'items-start justify-start'"
           :style="`${cardsContainerScaledStyle}`"
           ref="cards-container">

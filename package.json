@@ -1,6 +1,6 @@
 {
-  "name": "spike-performance",
-  "version": "0.1.0",
+  "name": "relation-landscape",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -46,8 +46,8 @@
     "vue-template-compiler": "^2.6.10"
   },
   "leanixReport": {
-    "id": "net.leanix.report.spikePerformance",
-    "title": "Spike: Performance",
+    "id": "net.leanix.report.relationLandscape",
+    "title": "Relation Landscape",
     "defaultConfig": {}
   }
 }

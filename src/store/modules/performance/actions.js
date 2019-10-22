@@ -1,14 +1,3 @@
-import domtoimage from '../../../helpers/dom-to-image-more'
-
-// eslint-disable-next-line
-const generateReportImageUrl = async el => {
-  const height = el.scrollHeight
-  const width = el.scrollWidth
-  const scale = 2
-  const dataUrl = await domtoimage.toPng(el, { height, width, scale })
-  return dataUrl
-}
-
 export const generateReportConfiguration = (store, { vm }) => {
   const { commit, state, getters, dispatch } = store
   const { tree } = state
@@ -21,12 +10,7 @@ export const generateReportConfiguration = (store, { vm }) => {
     allowEditing: false,
     allowTableView: false,
     export: {
-      beforeExport: async () => {
-        const dataUrl = await generateReportImageUrl(vm.$refs['cards-container'])
-        const img = new Image()
-        img.src = dataUrl
-        return img
-      }
+      exportElementSelector: 'div.cards-container'
     },
     menuActions: {
       showConfigure: true,
